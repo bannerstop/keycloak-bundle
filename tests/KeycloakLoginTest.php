@@ -6,6 +6,9 @@ namespace Bannerstop\KeycloakBundle\Tests;
 
 use Bannerstop\Keycloak\Admin\UserDirectory;
 use Bannerstop\Keycloak\Exception\HttpException;
+use Bannerstop\Keycloak\Session\SessionRevocations;
+use Bannerstop\Keycloak\Token\LogoutToken;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
  * Runs against the Keycloak of the core package's tests-e2e (KEYCLOAK_URL).
@@ -180,6 +183,98 @@ final class KeycloakLoginTest extends KeycloakTestCase
         $this->expectException(HttpException::class);
 
         self::usernames($this->kernel->getContainer()->get(UserDirectory::class));
+    }
+
+    public function testBackchannelLogoutRejectsInvalidTokens(): void
+    {
+        $browser = $this->browser(self::config());
+
+        $browser->request('POST', '/login/keycloak/backchannel-logout', ['logout_token' => 'a.b.c']);
+        self::assertSame(400, $browser->getResponse()->getStatusCode());
+        self::assertStringContainsString('no-store', (string) $browser->getResponse()->headers->get('Cache-Control'));
+
+        $browser->request('POST', '/login/keycloak/backchannel-logout');
+        self::assertSame(400, $browser->getResponse()->getStatusCode());
+    }
+
+    public function testABackchannelLogoutEndsTheSession(): void
+    {
+        $browser = $this->browser(self::config());
+        $session = $this->loginAndGetSession($browser);
+        $browser->request('GET', '/me');
+        self::assertSame(200, $browser->getResponse()->getStatusCode());
+
+        /** @var SessionRevocations $revocations */
+        $revocations = $this->kernel->getContainer()->get('test.service_container')->get('bannerstop_keycloak.session_revocations');
+        self::assertTrue($revocations->revoke(new LogoutToken($session['subject'], $session['session_id'], time(), uniqid('jti-', true))));
+
+        $browser->request('GET', '/me', [], [], ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest']);
+        self::assertSame(401, $browser->getResponse()->getStatusCode(), 'XHR requests get a 401 instead of a redirect.');
+
+        $browser->request('GET', '/me');
+        self::assertSame(302, $browser->getResponse()->getStatusCode());
+        self::assertSame('/login/keycloak', parse_url((string) $browser->getResponse()->headers->get('Location'), PHP_URL_PATH), 'The session is gone, the entry point asks for a login.');
+    }
+
+    public function testTheRefreshCheckEndsSessionsKeycloakEnded(): void
+    {
+        $browser = $this->browser(self::config(['session' => ['check_interval' => 1]]));
+        $session = $this->loginAndGetSession($browser);
+        self::adminApi('DELETE', '/sessions/' . $session['session_id']);
+        sleep(2);
+
+        $browser->request('GET', '/me');
+
+        self::assertSame(302, $browser->getResponse()->getStatusCode());
+        self::assertSame('http://localhost/me', $browser->getResponse()->headers->get('Location'), 'Back to the same page, where the firewall asks for a login.');
+        $removed = array_filter($browser->getResponse()->headers->getCookies(), static function ($cookie): bool {
+            return 'REMEMBERME' === $cookie->getName();
+        });
+        self::assertNotEmpty($removed, 'The remember-me cookie is cleared, so it cannot bring the session back.');
+        self::assertLessThan(time(), array_values($removed)[0]->getExpiresTime());
+    }
+
+    public function testTheRefreshCheckKeepsLiveSessions(): void
+    {
+        $browser = $this->browser(self::config(['session' => ['check_interval' => 1]]));
+        $session = $this->loginAndGetSession($browser);
+        sleep(2);
+
+        $browser->request('GET', '/me');
+
+        self::assertSame(200, $browser->getResponse()->getStatusCode());
+        $checked = $browser->getRequest()->getSession()->get('_bannerstop_keycloak.session');
+        self::assertGreaterThan($session['checked_at'], $checked['checked_at']);
+        self::assertNotSame($session['tokens']['access_token'], $checked['tokens']['access_token'], 'The tokens were refreshed.');
+    }
+
+    /**
+     * Logs in through Keycloak and returns the stored Keycloak session.
+     *
+     * @param KernelBrowser $browser
+     *
+     * @return array<string, mixed>
+     */
+    private function loginAndGetSession($browser): array
+    {
+        $browser->request('GET', '/login/keycloak');
+        $browser->request('GET', '/login/keycloak/callback?' . http_build_query(self::keycloakLogin((string) $browser->getResponse()->headers->get('Location'))));
+        $session = $browser->getRequest()->getSession()->get('_bannerstop_keycloak.session');
+        self::assertIsArray($session);
+        self::assertIsString($session['session_id']);
+
+        return $session;
+    }
+
+    private static function adminApi(string $method, string $path): void
+    {
+        $curl = curl_init(getenv('KEYCLOAK_URL') . '/realms/master/protocol/openid-connect/token');
+        curl_setopt_array($curl, [CURLOPT_RETURNTRANSFER => true, CURLOPT_POSTFIELDS => http_build_query(['grant_type' => 'password', 'client_id' => 'admin-cli', 'username' => 'admin', 'password' => 'admin'])]);
+        $token = json_decode((string) curl_exec($curl), true)['access_token'];
+        $curl = curl_init(getenv('KEYCLOAK_URL') . '/admin/realms/example' . $path);
+        curl_setopt_array($curl, [CURLOPT_RETURNTRANSFER => true, CURLOPT_CUSTOMREQUEST => $method, CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $token]]);
+        curl_exec($curl);
+        self::assertLessThan(300, curl_getinfo($curl, CURLINFO_RESPONSE_CODE), $method . ' ' . $path);
     }
 
     /**
