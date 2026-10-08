@@ -83,6 +83,7 @@ final class TestKernel extends Kernel
             'pattern' => '^/',
             'provider' => 'keycloak',
             'logout' => ['path' => 'logout'],
+            'remember_me' => ['secret' => 'test', 'always_remember_me' => true],
         ];
         $api = [
             'pattern' => '^/api/',

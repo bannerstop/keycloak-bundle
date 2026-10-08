@@ -23,7 +23,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class BearerHandler
 {
-    /** @var KeycloakClient */
+    /** @var \Closure(): KeycloakClient Built on first use, see LoginHandler */
     private $client;
 
     /** @var RoleMapper */
@@ -35,7 +35,10 @@ final class BearerHandler
     /** @var string|null */
     private $audience;
 
-    public function __construct(KeycloakClient $client, RoleMapper $roleMapper, UserProvisioner $provisioner, ?string $audience)
+    /**
+     * @param \Closure(): KeycloakClient $client Built on first use, see LoginHandler
+     */
+    public function __construct(\Closure $client, RoleMapper $roleMapper, UserProvisioner $provisioner, ?string $audience)
     {
         $this->client = $client;
         $this->roleMapper = $roleMapper;
@@ -54,7 +57,7 @@ final class BearerHandler
     public function authenticate(string $token): UserInterface
     {
         try {
-            $identity = $this->client->verifyAccessToken($token, $this->audience);
+            $identity = ($this->client)()->verifyAccessToken($token, $this->audience);
         } catch (InvalidTokenException $exception) {
             throw new CustomUserMessageAuthenticationException('The access token is invalid.', [], 0, $exception);
         } catch (HttpException $exception) {

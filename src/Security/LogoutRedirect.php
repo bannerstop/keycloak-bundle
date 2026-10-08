@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 final class LogoutRedirect
 {
-    /** @var KeycloakClient */
+    /** @var \Closure(): KeycloakClient Built on first use: most logouts in tests and local setups never reach Keycloak */
     private $client;
 
     /** @var SessionTokenStore */
@@ -29,7 +29,10 @@ final class LogoutRedirect
     /** @var string */
     private $logoutTarget;
 
-    public function __construct(KeycloakClient $client, SessionTokenStore $tokenStore, LoginHandler $loginHandler, string $logoutTarget)
+    /**
+     * @param \Closure(): KeycloakClient $client Built on first use: most logouts in tests and local setups never reach Keycloak
+     */
+    public function __construct(\Closure $client, SessionTokenStore $tokenStore, LoginHandler $loginHandler, string $logoutTarget)
     {
         $this->client = $client;
         $this->tokenStore = $tokenStore;
@@ -48,7 +51,7 @@ final class LogoutRedirect
         }
         $this->tokenStore->clear($request);
         try {
-            $url = $this->client->getLogoutUrl($this->loginHandler->absoluteUrl($request, $this->logoutTarget), $tokens->getIdToken());
+            $url = ($this->client)()->getLogoutUrl($this->loginHandler->absoluteUrl($request, $this->logoutTarget), $tokens->getIdToken());
         } catch (HttpException $exception) {
             return null;
         }
