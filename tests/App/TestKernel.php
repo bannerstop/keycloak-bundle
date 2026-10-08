@@ -110,6 +110,7 @@ final class TestKernel extends Kernel
                     'provider' => 'keycloak',
                     'custom_authenticators' => ['bannerstop_keycloak.authenticator'],
                     'logout' => ['path' => 'logout'],
+                    'remember_me' => ['secret' => 'test', 'always_remember_me' => true, 'signature_properties' => ['userIdentifier']],
                 ],
             ],
             'access_control' => [
@@ -119,6 +120,5 @@ final class TestKernel extends Kernel
                 ['path' => '^/', 'roles' => 'ROLE_USER'],
             ],
         ];
-        return $config;
     }
 }
