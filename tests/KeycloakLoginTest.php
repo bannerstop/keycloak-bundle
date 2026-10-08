@@ -184,9 +184,6 @@ final class KeycloakLoginTest extends KeycloakTestCase
         self::usernames($this->kernel->getContainer()->get(UserDirectory::class));
     }
 
-    /**
-     * @return string[]
-     */
     public function testBackchannelLogoutRejectsInvalidTokens(): void
     {
         $browser = $this->browser(self::config());
@@ -275,6 +272,9 @@ final class KeycloakLoginTest extends KeycloakTestCase
         self::assertLessThan(300, curl_getinfo($curl, CURLINFO_RESPONSE_CODE), $method . ' ' . $path);
     }
 
+    /**
+     * @return string[]
+     */
     private static function usernames(UserDirectory $directory): array
     {
         $usernames = [];
