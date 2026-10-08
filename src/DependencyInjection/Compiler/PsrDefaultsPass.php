@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bannerstop\KeycloakBundle\DependencyInjection\Compiler;
 
+use Bannerstop\Keycloak\Session\SessionRevocations;
 use Bannerstop\KeycloakBundle\DependencyInjection\BannerstopKeycloakExtension;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Cache\CacheItemPoolInterface;
@@ -11,6 +12,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\Cache\Psr16Cache;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Exception\LogicException;
@@ -43,14 +45,22 @@ final class PsrDefaultsPass implements CompilerPassInterface
         $this->factory($container, BannerstopKeycloakExtension::REQUEST_FACTORY, $psr['request_factory'], RequestFactoryInterface::class, $psr['http_client']);
         $this->factory($container, BannerstopKeycloakExtension::STREAM_FACTORY, $psr['stream_factory'], StreamFactoryInterface::class, $psr['http_client']);
 
-        $cache = $psr['cache'];
+        $this->cache($container, $psr['cache']);
+        if ($container->has(BannerstopKeycloakExtension::CACHE)) {
+            $container->register(BannerstopKeycloakExtension::SESSION_REVOCATIONS, SessionRevocations::class)
+                ->setArguments([new Reference(BannerstopKeycloakExtension::CACHE), '%bannerstop_keycloak.session.revocation_ttl%']);
+        }
+    }
+
+    private function cache(ContainerBuilder $container, ?string $cache): void
+    {
         if (null === $cache || !$container->has($cache)) {
             return;
         }
         $class = $this->serviceClass($container, $cache);
         if (null !== $class && is_subclass_of($class, CacheInterface::class)) {
             $container->setAlias(BannerstopKeycloakExtension::CACHE, $cache);
-        } elseif (null !== $class && is_subclass_of($class, CacheItemPoolInterface::class) && class_exists(Psr16Cache::class)) {
+        } elseif (null !== $class && is_subclass_of($class, CacheItemPoolInterface::class) && self::psr16CacheIsUsable()) {
             $container->register(BannerstopKeycloakExtension::CACHE, Psr16Cache::class)->setArguments([new Reference($cache)]);
         }
     }
@@ -84,9 +94,27 @@ final class PsrDefaultsPass implements CompilerPassInterface
         $container->register($id, Psr17Factory::class);
     }
 
+    /**
+     * symfony/cache before 6.0 refuses to load its Psr16Cache next to
+     * psr/simple-cache 3; the cache then stays off, as without symfony/cache.
+     */
+    private static function psr16CacheIsUsable(): bool
+    {
+        try {
+            return class_exists(Psr16Cache::class);
+        } catch (\LogicException) {
+            return false;
+        }
+    }
+
     private function serviceClass(ContainerBuilder $container, string $id): ?string
     {
-        $class = $container->findDefinition($id)->getClass();
+        $definition = $container->findDefinition($id);
+        // Cache pools like cache.app are child definitions whose class comes from a parent.
+        while (null === $definition->getClass() && $definition instanceof ChildDefinition) {
+            $definition = $container->findDefinition($definition->getParent());
+        }
+        $class = $definition->getClass();
         if (null === $class) {
             return null;
         }
