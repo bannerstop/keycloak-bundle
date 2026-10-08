@@ -71,7 +71,28 @@ final class Configuration implements ConfigurationInterface
         $node
             ->addDefaultsIfNotSet()
             ->children()
-                ->arrayNode('allowed_email_domains')->scalarPrototype()->end()->defaultValue([])->info('Empty allows every domain')->end()
+                ->variableNode('allowed_email_domains')
+                    ->defaultValue([])
+                    ->info('A list, or a comma separated string, e.g. "%env(KEYCLOAK_ALLOWED_EMAIL_DOMAINS)%"; empty allows every domain')
+                    ->validate()
+                        ->ifTrue(static function ($domains): bool {
+                            if (is_string($domains)) {
+                                return false;
+                            }
+                            if (!is_array($domains)) {
+                                return true;
+                            }
+                            foreach ($domains as $domain) {
+                                if (!is_string($domain)) {
+                                    return true;
+                                }
+                            }
+
+                            return false;
+                        })
+                        ->thenInvalid('allowed_email_domains must be a list of domains or a comma separated string, got %s.')
+                    ->end()
+                ->end()
                 ->booleanNode('require_verified_email')->defaultTrue()->end()
                 ->scalarNode('default_target_path')->defaultValue('/')->end()
                 ->scalarNode('failure_path')->defaultValue('/')->info('Path or route name to send users to when a login fails')->end()

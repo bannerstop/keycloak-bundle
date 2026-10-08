@@ -74,4 +74,11 @@ final class ContainerTest extends KeycloakTestCase
         $browser->request('GET', '/logout');
         self::assertSame(302, $browser->getResponse()->getStatusCode());
     }
+
+    public function testRejectsInvalidDomainLists(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+
+        $this->browser(self::config(['login' => ['allowed_email_domains' => [42]]]));
+    }
 }
