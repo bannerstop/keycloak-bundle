@@ -3,6 +3,13 @@
 The project follows [Semantic Versioning](https://semver.org/). Each major
 version raises the minimum PHP version and the supported Symfony versions.
 
+## 8.2.0
+
+- `login.allowed_email_domains` also takes a comma separated string, so the
+  domains can come from an environment variable, e.g.
+  `'%env(KEYCLOAK_ALLOWED_EMAIL_DOMAINS)%'`. An empty value allows every
+  domain, like an empty list.
+
 ## 8.1.1
 
 - Pages without a Keycloak login (the login page, form logins, public pages)

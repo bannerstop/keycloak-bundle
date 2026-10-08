@@ -116,6 +116,25 @@ final class KeycloakLoginTest extends KeycloakTestCase
         self::assertSame(['error' => 'keycloak.login.not_allowed'], json_decode((string) $browser->getResponse()->getContent(), true));
     }
 
+    public function testAllowedDomainsFromAnEnvironmentVariable(): void
+    {
+        $cases = [
+            'example.org, other.test' => '/public',
+            ' other.test,example.com ' => '/',
+            '' => '/',
+        ];
+        foreach ($cases as $domains => $expected) {
+            $_SERVER['BANNERSTOP_KEYCLOAK_TEST_DOMAINS'] = $domains;
+            $browser = $this->browser(self::config(['login' => ['allowed_email_domains' => '%env(BANNERSTOP_KEYCLOAK_TEST_DOMAINS)%']]));
+
+            $browser->request('GET', '/login/keycloak');
+            $browser->request('GET', '/login/keycloak/callback?' . http_build_query(self::keycloakLogin((string) $browser->getResponse()->headers->get('Location'))));
+
+            self::assertSame($expected, $browser->getResponse()->headers->get('Location'), sprintf('domains "%s"', $domains));
+            $this->kernel->shutdown();
+        }
+    }
+
     public function testForgedCallbacksAreRejected(): void
     {
         $browser = $this->browser(self::config());
