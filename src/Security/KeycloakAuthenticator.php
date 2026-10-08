@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
@@ -36,14 +37,15 @@ final class KeycloakAuthenticator extends AbstractAuthenticator implements Authe
     {
         $user = $this->handler->finish($request);
 
+        // The badge only takes effect if the firewall has remember_me configured.
         return new SelfValidatingPassport(new UserBadge($user->getUserIdentifier(), static function () use ($user) {
             return $user;
-        }));
+        }), [new RememberMeBadge()]);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        return $this->handler->onSuccess($request);
+        return $this->handler->onSuccess($request, $firewallName);
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response

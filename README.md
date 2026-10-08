@@ -165,6 +165,10 @@ Use a firewall provider that can load this user by its identifier (e.g. an
 entity provider on the same property), because Symfony refreshes the user
 from there on every request.
 
+`remember_me` on the firewall applies to Keycloak logins as well. Restoring a
+login from the cookie needs a user provider that can load the user, so it works
+with your own users, not with the session-only `KeycloakUser`.
+
 ### Login errors
 
 A failed login redirects to `failure_path`. `AuthenticationUtils::getLastAuthenticationError()`

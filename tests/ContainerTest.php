@@ -59,4 +59,19 @@ final class ContainerTest extends KeycloakTestCase
 
         $this->browser(self::config(['directory' => ['client_id' => 'app-directory']]));
     }
+
+    public function testPagesWithoutKeycloakLoginWorkWithoutKeycloakSettings(): void
+    {
+        $_SERVER['BANNERSTOP_KEYCLOAK_TEST_EMPTY'] = '';
+        $browser = $this->browser(self::config(['server_url' => '%env(BANNERSTOP_KEYCLOAK_TEST_EMPTY)%']));
+
+        $browser->request('GET', '/public');
+        self::assertSame(200, $browser->getResponse()->getStatusCode());
+
+        $browser->request('GET', '/me');
+        self::assertSame('/login/keycloak', parse_url((string) $browser->getResponse()->headers->get('Location'), PHP_URL_PATH));
+
+        $browser->request('GET', '/logout');
+        self::assertSame(302, $browser->getResponse()->getStatusCode());
+    }
 }
