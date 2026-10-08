@@ -109,21 +109,41 @@ security:
 ### Your own users
 
 By default users only live in the session (`KeycloakUser`, identified by the
-Keycloak subject). To use your own user entity, implement `UserProvisioner`
-and point `user_provisioner` to it:
+Keycloak subject) and are served by `bannerstop_keycloak.user_provider`.
+
+To use your own user entity instead, implement
+`Bannerstop\KeycloakBundle\User\UserProvisioner`. After every successful login
+and every accepted bearer token, the bundle calls `provision()` with the
+verified identity and the mapped roles; the user it returns is the
+authenticated user. Link accounts by the Keycloak subject, not by e-mail
+address, which can change:
 
 ```php
+// src/Security/KeycloakUserProvisioner.php
+namespace App\Security;
+
+use App\Entity\User;
+use App\Repository\UserRepository;
 use Bannerstop\Keycloak\Identity;
 use Bannerstop\KeycloakBundle\User\UserProvisioner;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 final class KeycloakUserProvisioner implements UserProvisioner
 {
+    public function __construct(
+        private UserRepository $users,
+        private EntityManagerInterface $entityManager,
+    ) {
+    }
+
     public function provision(Identity $identity, array $roles): UserInterface
     {
         $user = $this->users->findOneBy(['keycloakId' => $identity->getSubject()])
             ?? (new User())->setKeycloakId($identity->getSubject());
-        $user->setEmail($identity->getEmail())->setName($identity->getDisplayName())->setRoles($roles);
+        $user->setEmail($identity->getEmail())
+            ->setName($identity->getDisplayName())
+            ->setRoles($roles);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
@@ -132,9 +152,37 @@ final class KeycloakUserProvisioner implements UserProvisioner
 }
 ```
 
-Use a firewall provider that can load this user by its identifier (e.g. an
-entity provider on the same property), because Symfony refreshes the user
-from there on every request.
+`user_provisioner` is an option of this bundle (not of Symfony itself) and
+takes the service id of your provisioner. With autowiring, the id is the
+class name:
+
+```yaml
+# config/packages/bannerstop_keycloak.yaml
+bannerstop_keycloak:
+    # ...
+    user_provisioner: App\Security\KeycloakUserProvisioner
+```
+
+The firewall then uses your usual entity provider instead of
+`bannerstop_keycloak.user_provider`:
+
+```yaml
+# config/packages/security.yaml
+security:
+    providers:
+        app_users:
+            entity:
+                class: App\Entity\User
+                property: keycloakId
+    firewalls:
+        main:
+            provider: app_users
+            custom_authenticators: [bannerstop_keycloak.authenticator]
+```
+
+The provisioner hands Symfony the user at login; on every following request
+Symfony reloads it through the firewall's provider. That provider must
+therefore return the same entity class.
 
 ### Login errors
 
