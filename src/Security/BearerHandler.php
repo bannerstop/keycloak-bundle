@@ -23,8 +23,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class BearerHandler
 {
+    /**
+     * @param \Closure(): KeycloakClient $client Built on first use, see LoginHandler
+     */
     public function __construct(
-        private KeycloakClient $client,
+        private \Closure $client,
         private RoleMapper $roleMapper,
         private UserProvisioner $provisioner,
         private ?string $audience,
@@ -42,7 +45,7 @@ final class BearerHandler
     public function authenticate(string $token): UserInterface
     {
         try {
-            $identity = $this->client->verifyAccessToken($token, $this->audience);
+            $identity = ($this->client)()->verifyAccessToken($token, $this->audience);
         } catch (InvalidTokenException $exception) {
             throw new CustomUserMessageAuthenticationException('The access token is invalid.', [], 0, $exception);
         } catch (HttpException $exception) {
