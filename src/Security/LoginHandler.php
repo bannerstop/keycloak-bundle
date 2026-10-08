@@ -8,6 +8,7 @@ use Bannerstop\Keycloak\Exception\LoginException;
 use Bannerstop\Keycloak\Login\LoginFlow;
 use Bannerstop\Keycloak\Login\RedirectTarget;
 use Bannerstop\Keycloak\Role\RoleMapper;
+use Bannerstop\Keycloak\Session\KeycloakSession;
 use Bannerstop\KeycloakBundle\User\UserProvisioner;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -67,7 +68,7 @@ final readonly class LoginHandler
 
         $identity = $result->getIdentity();
         $user = $this->provisioner->provision($identity, $this->roleMapper->map($identity));
-        $this->tokenStore->save($request, $result->getTokens());
+        $this->tokenStore->saveSession($request, KeycloakSession::fromLogin($result, time()));
         $request->attributes->set(self::RETURN_TO, $result->getReturnTo());
 
         return $user;
