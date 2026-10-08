@@ -8,10 +8,10 @@ use Bannerstop\Keycloak\Admin\UserDirectory;
 use Bannerstop\Keycloak\KeycloakClient;
 use Bannerstop\Keycloak\KeycloakConfig;
 use Bannerstop\Keycloak\Login\LoginFlow;
-use Bannerstop\Keycloak\Policy\EmailDomainPolicy;
 use Bannerstop\Keycloak\Role\RoleMapper;
 use Bannerstop\KeycloakBundle\Controller\LoginController;
 use Bannerstop\KeycloakBundle\Security\BearerHandler;
+use Bannerstop\KeycloakBundle\Security\ConfiguredEmailDomainPolicy;
 use Bannerstop\KeycloakBundle\Security\Guard\KeycloakBearerGuardAuthenticator;
 use Bannerstop\KeycloakBundle\Security\Guard\KeycloakGuardAuthenticator;
 use Bannerstop\KeycloakBundle\Security\Guard\KeycloakLogoutSuccessHandler;
@@ -108,8 +108,9 @@ final class BannerstopKeycloakExtension extends Extension
             ->setPublic(true);
 
         $policies = [];
-        if ([] !== $config['login']['allowed_email_domains']) {
-            $container->register('bannerstop_keycloak.email_domain_policy', EmailDomainPolicy::class)
+        // A string can be an environment variable, whose value is only known at runtime.
+        if (is_string($config['login']['allowed_email_domains']) || [] !== $config['login']['allowed_email_domains']) {
+            $container->register('bannerstop_keycloak.email_domain_policy', ConfiguredEmailDomainPolicy::class)
                 ->setArguments([$config['login']['allowed_email_domains'], $config['login']['require_verified_email']]);
             $policies[] = new Reference('bannerstop_keycloak.email_domain_policy');
         }
