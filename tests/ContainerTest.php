@@ -17,7 +17,7 @@ final class ContainerTest extends KeycloakTestCase
         $container = $this->kernel->getContainer();
 
         $client = $container->get(KeycloakClient::class);
-        self::assertSame('http://keycloak:8080/realms/example', $client->getConfig()->getIssuer());
+        self::assertSame(self::config()['server_url'] . '/realms/example', $client->getConfig()->getIssuer());
         self::assertInstanceOf(LoginFlow::class, $container->get(LoginFlow::class));
         self::assertInstanceOf(RoleMapper::class, $container->get(RoleMapper::class));
     }
