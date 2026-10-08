@@ -20,7 +20,7 @@ final class TestKernel extends Kernel
      * @param array<string, mixed> $keycloakConfig
      */
     public function __construct(
-        private array $keycloakConfig,
+        private readonly array $keycloakConfig,
     ) {
         parent::__construct('test', true);
     }

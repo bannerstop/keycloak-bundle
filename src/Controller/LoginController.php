@@ -17,9 +17,9 @@ final class LoginController
      * @param array<string, string> $authorizationParameters
      */
     public function __construct(
-        private LoginFlow $flow,
-        private UrlGeneratorInterface $urlGenerator,
-        private array $authorizationParameters,
+        private readonly LoginFlow $flow,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly array $authorizationParameters,
     ) {
     }
 
@@ -37,7 +37,7 @@ final class LoginController
         ));
     }
 
-    public function callback(): void
+    public function callback(): never
     {
         throw new \LogicException('The Keycloak callback must be handled by the bundle\'s authenticator. Add it to the firewall that covers this route.');
     }

@@ -15,7 +15,7 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 final class LogoutSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private LogoutRedirect $redirect,
+        private readonly LogoutRedirect $redirect,
     ) {
     }
 

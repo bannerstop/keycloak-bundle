@@ -18,10 +18,10 @@ final class KeycloakUser implements UserInterface, EquatableInterface, \Stringab
      * @param string[] $roles
      */
     public function __construct(
-        private string $subject,
-        private ?string $email,
-        private string $displayName,
-        private array $roles,
+        private readonly string $subject,
+        private readonly ?string $email,
+        private readonly string $displayName,
+        private readonly array $roles,
     ) {
     }
 

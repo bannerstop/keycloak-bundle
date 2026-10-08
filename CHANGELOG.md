@@ -3,6 +3,12 @@
 The project follows [Semantic Versioning](https://semver.org/). Each major
 version raises the minimum PHP version and the supported Symfony versions.
 
+## 6.0.0
+
+- Requires PHP 8.1 or later, bannerstop/keycloak 6 and Symfony 5.4 or 6.4.
+- Login error keys come from the core's `LoginFailure` enum; the keys themselves (`keycloak.login.*`) are unchanged.
+- Readonly properties; `LoginController::callback()` returns `never`.
+
 ## 5.0.0
 
 - Requires PHP 8.0 or later, bannerstop/keycloak 5 and Symfony 5.4 or 6.

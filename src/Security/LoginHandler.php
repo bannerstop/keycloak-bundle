@@ -31,14 +31,14 @@ final class LoginHandler
     private const RETURN_TO = '_bannerstop_keycloak.return_to';
 
     public function __construct(
-        private LoginFlow $flow,
-        private RoleMapper $roleMapper,
-        private UserProvisioner $provisioner,
-        private SessionTokenStore $tokenStore,
-        private UrlGeneratorInterface $urlGenerator,
-        private ?LoggerInterface $logger,
-        private string $defaultTargetPath,
-        private string $failurePath,
+        private readonly LoginFlow $flow,
+        private readonly RoleMapper $roleMapper,
+        private readonly UserProvisioner $provisioner,
+        private readonly SessionTokenStore $tokenStore,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly ?LoggerInterface $logger,
+        private readonly string $defaultTargetPath,
+        private readonly string $failurePath,
     ) {
     }
 
@@ -55,11 +55,9 @@ final class LoginHandler
         try {
             $result = $this->flow->finish($request->query->all());
         } catch (LoginException $exception) {
-            if (null !== $this->logger) {
-                $this->logger->notice('Keycloak login failed: {message}', ['message' => $exception->getMessage(), 'reason' => $exception->getReason()]);
-            }
+            $this->logger?->notice('Keycloak login failed: {message}', ['message' => $exception->getMessage(), 'reason' => $exception->getReason()->value]);
 
-            throw new CustomUserMessageAuthenticationException('keycloak.login.' . $exception->getReason(), [], 0, $exception);
+            throw new CustomUserMessageAuthenticationException('keycloak.login.' . $exception->getReason()->value, [], 0, $exception);
         }
 
         $identity = $result->getIdentity();

@@ -24,10 +24,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 final class BearerHandler
 {
     public function __construct(
-        private KeycloakClient $client,
-        private RoleMapper $roleMapper,
-        private UserProvisioner $provisioner,
-        private ?string $audience,
+        private readonly KeycloakClient $client,
+        private readonly RoleMapper $roleMapper,
+        private readonly UserProvisioner $provisioner,
+        private readonly ?string $audience,
     ) {
     }
 

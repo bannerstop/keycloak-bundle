@@ -26,7 +26,7 @@ final class Configuration implements ConfigurationInterface
                 ->arrayNode('allowed_algorithms')
                     ->scalarPrototype()
                         ->validate()
-                            ->ifNotInArray(Algorithm::all())
+                            ->ifNotInArray(Algorithm::names())
                             ->thenInvalid('Unsupported signature algorithm %s.')
                         ->end()
                     ->end()

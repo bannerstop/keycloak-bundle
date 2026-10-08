@@ -20,7 +20,7 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
 final class KeycloakAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
     public function __construct(
-        private LoginHandler $handler,
+        private readonly LoginHandler $handler,
     ) {
     }
 

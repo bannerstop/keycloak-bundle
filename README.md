@@ -18,6 +18,7 @@ single sign-on with Keycloak for the Symfony security component.
 | 3.x     | ≥ 7.3   | 4.4 (Guard), 5.4 (Guard or authenticator system) |
 | 4.x     | ≥ 7.4   | 4.4 (Guard), 5.4 (Guard or authenticator system) |
 | 5.x     | ≥ 8.0   | 5.4, 6.x (authenticator system) |
+| 6.x     | ≥ 8.1   | 5.4, 6.4 |
 
 ## Installation
 

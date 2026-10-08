@@ -3,6 +3,11 @@
 Each major version raises the minimum PHP version and the supported Symfony
 versions. Only the steps that need changes in your code are listed.
 
+## 5.x → 6.x
+
+- PHP 8.1 or later and Symfony 5.4 or 6.4 are required.
+- If you use `Bannerstop\Keycloak\KeycloakClient` or catch `LoginException` yourself, follow the core's upgrade guide (`LoginFailure` enum, `Algorithm` enum).
+
 ## 4.x → 5.x
 
 - PHP 8.0 or later and Symfony 5.4 or 6 are required.

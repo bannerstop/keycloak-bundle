@@ -12,8 +12,8 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 final class TestController
 {
     public function __construct(
-        private TokenStorageInterface $tokenStorage,
-        private AuthenticationUtils $authenticationUtils,
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly AuthenticationUtils $authenticationUtils,
     ) {
     }
 
