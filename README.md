@@ -73,8 +73,19 @@ bannerstop_keycloak:
     bearer:
         audience: 'my-api'          # defaults to the client id
 
+    directory:                      # optional, see below
+        client_id: 'my-app-directory'
+        client_secret: '%env(KEYCLOAK_DIRECTORY_CLIENT_SECRET)%'
+
     # user_provisioner: App\Security\KeycloakUserProvisioner
 ```
+
+`directory` gives the user directory (`UserDirectory`, admin REST API) its own
+confidential client. We recommend it: create a client with only *Service
+accounts roles* enabled and assign `realm-management` → `view-users` to its
+service account, so that the login client has no admin API rights. Without
+`directory`, the login client is used for both and needs the service account
+and `view-users` itself.
 
 `cache` (default `cache.app`) caches the discovery document and the signing
 keys. `http_client`, `request_factory` and `stream_factory` take service ids
@@ -195,7 +206,7 @@ then returns an exception whose message key is one of
 | Service | Use |
 |---------|-----|
 | `Bannerstop\Keycloak\KeycloakClient` | refresh tokens, userinfo, verify tokens yourself |
-| `Bannerstop\Keycloak\Admin\UserDirectory` | list users of the realm (service account with `view-users`) |
+| `Bannerstop\Keycloak\Admin\UserDirectory` | list users of the realm through the service account of the `directory` client, or of the login client (`view-users`) |
 | `Bannerstop\Keycloak\Role\RoleMapper` | the configured role mapping |
 
 ## License
