@@ -12,9 +12,6 @@ use Bannerstop\Keycloak\Policy\EmailDomainPolicy;
 use Bannerstop\Keycloak\Role\RoleMapper;
 use Bannerstop\KeycloakBundle\Controller\LoginController;
 use Bannerstop\KeycloakBundle\Security\BearerHandler;
-use Bannerstop\KeycloakBundle\Security\Guard\KeycloakBearerGuardAuthenticator;
-use Bannerstop\KeycloakBundle\Security\Guard\KeycloakGuardAuthenticator;
-use Bannerstop\KeycloakBundle\Security\Guard\KeycloakLogoutSuccessHandler;
 use Bannerstop\KeycloakBundle\Security\KeycloakAuthenticator;
 use Bannerstop\KeycloakBundle\Security\KeycloakBearerAuthenticator;
 use Bannerstop\KeycloakBundle\Security\LoginHandler;
@@ -27,20 +24,14 @@ use Bannerstop\KeycloakBundle\User\KeycloakUserProvisioner;
 use Bannerstop\KeycloakBundle\User\UserProvisioner;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
-use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
-use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 /**
  * Service ids for security.yaml:
  *
- * - bannerstop_keycloak.authenticator / .bearer_authenticator (Symfony 5.3+)
- * - bannerstop_keycloak.guard_authenticator / .bearer_guard_authenticator (Guard)
+ * - bannerstop_keycloak.authenticator / .bearer_authenticator
  * - bannerstop_keycloak.user_provider
- * - bannerstop_keycloak.logout_success_handler (Symfony 4.4)
  */
 final class BannerstopKeycloakExtension extends Extension
 {
@@ -142,31 +133,17 @@ final class BannerstopKeycloakExtension extends Extension
                 $config['login']['logout_target'],
             ]);
 
-        if (class_exists(AbstractAuthenticator::class)) {
-            $this->authenticator($container, 'bannerstop_keycloak.authenticator', KeycloakAuthenticator::class, 'bannerstop_keycloak.login_handler');
-            $this->authenticator($container, 'bannerstop_keycloak.bearer_authenticator', KeycloakBearerAuthenticator::class, 'bannerstop_keycloak.bearer_handler');
-        }
-        if (class_exists(AbstractGuardAuthenticator::class)) {
-            $this->authenticator($container, 'bannerstop_keycloak.guard_authenticator', KeycloakGuardAuthenticator::class, 'bannerstop_keycloak.login_handler');
-            $this->authenticator($container, 'bannerstop_keycloak.bearer_guard_authenticator', KeycloakBearerGuardAuthenticator::class, 'bannerstop_keycloak.bearer_handler');
-        }
-        if (class_exists(LogoutEvent::class)) {
-            $container->register('bannerstop_keycloak.logout_subscriber', LogoutSubscriber::class)
-                ->setArguments([new Reference('bannerstop_keycloak.logout_redirect')])
-                ->addTag('kernel.event_subscriber');
-        } else {
-            $container->register('bannerstop_keycloak.logout_success_handler', KeycloakLogoutSuccessHandler::class)
-                ->setArguments([new Reference('bannerstop_keycloak.logout_redirect')]);
-        }
+        $container->register('bannerstop_keycloak.authenticator', KeycloakAuthenticator::class)
+            ->setArguments([new Reference('bannerstop_keycloak.login_handler')]);
+        $container->register('bannerstop_keycloak.bearer_authenticator', KeycloakBearerAuthenticator::class)
+            ->setArguments([new Reference('bannerstop_keycloak.bearer_handler')]);
+        $container->register('bannerstop_keycloak.logout_subscriber', LogoutSubscriber::class)
+            ->setArguments([new Reference('bannerstop_keycloak.logout_redirect')])
+            ->addTag('kernel.event_subscriber');
     }
 
     public function getAlias(): string
     {
         return 'bannerstop_keycloak';
-    }
-
-    private function authenticator(ContainerBuilder $container, string $id, string $class, string $handler): void
-    {
-        $container->setDefinition($id, new Definition($class, [new Reference($handler)]));
     }
 }

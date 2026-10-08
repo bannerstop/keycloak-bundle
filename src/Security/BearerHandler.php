@@ -17,23 +17,18 @@ use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationExc
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * What both bearer authenticator flavours do with an API request.
+ * What the bearer authenticator does with an API request.
  *
  * @internal
  */
 final class BearerHandler
 {
-    private KeycloakClient $client;
-    private RoleMapper $roleMapper;
-    private UserProvisioner $provisioner;
-    private ?string $audience;
-
-    public function __construct(KeycloakClient $client, RoleMapper $roleMapper, UserProvisioner $provisioner, ?string $audience)
-    {
-        $this->client = $client;
-        $this->roleMapper = $roleMapper;
-        $this->provisioner = $provisioner;
-        $this->audience = $audience;
+    public function __construct(
+        private KeycloakClient $client,
+        private RoleMapper $roleMapper,
+        private UserProvisioner $provisioner,
+        private ?string $audience,
+    ) {
     }
 
     public function token(Request $request): ?string

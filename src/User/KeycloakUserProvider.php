@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bannerstop\KeycloakBundle\User;
 
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -18,38 +17,30 @@ final class KeycloakUserProvider implements UserProviderInterface
 {
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
-        if (class_exists(UserNotFoundException::class)) {
-            $exception = new UserNotFoundException('KeycloakUser objects cannot be loaded by identifier.');
-            $exception->setUserIdentifier($identifier);
-        } else {
-            $exception = new UsernameNotFoundException('KeycloakUser objects cannot be loaded by identifier.');
-            $exception->setUsername($identifier);
-        }
+        $exception = new UserNotFoundException('KeycloakUser objects cannot be loaded by identifier.');
+        $exception->setUserIdentifier($identifier);
 
         throw $exception;
     }
 
     /**
-     * @param string $username
+     * Symfony 5.4 only; later versions call loadUserByIdentifier().
      */
-    public function loadUserByUsername($username): UserInterface
+    public function loadUserByUsername(string $username): UserInterface
     {
-        return $this->loadUserByIdentifier((string) $username);
+        return $this->loadUserByIdentifier($username);
     }
 
     public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof KeycloakUser) {
-            throw new UnsupportedUserException(sprintf('Unsupported user class "%s".', get_class($user)));
+            throw new UnsupportedUserException(sprintf('Unsupported user class "%s".', $user::class));
         }
 
         return $user;
     }
 
-    /**
-     * @param string $class
-     */
-    public function supportsClass($class): bool
+    public function supportsClass(string $class): bool
     {
         return KeycloakUser::class === $class;
     }

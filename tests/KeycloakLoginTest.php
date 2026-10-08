@@ -124,7 +124,6 @@ final class KeycloakLoginTest extends KeycloakTestCase
             CURLOPT_HEADER => true,
         ]);
         $response = (string) curl_exec($curl);
-        curl_close($curl);
         self::assertSame(1, preg_match('/^Location: (\S+)/mi', $response, $location), 'Keycloak redirects back.');
         parse_str((string) parse_url($location[1], PHP_URL_QUERY), $query);
 
@@ -140,7 +139,6 @@ final class KeycloakLoginTest extends KeycloakTestCase
             CURLOPT_POSTFIELDS => http_build_query(['grant_type' => 'password', 'client_id' => 'app', 'client_secret' => 'app-secret', 'username' => 'jdoe', 'password' => 'jane-password', 'scope' => 'openid']),
         ]);
         $response = json_decode((string) curl_exec($curl), true);
-        curl_close($curl);
 
         return $response['access_token'];
     }

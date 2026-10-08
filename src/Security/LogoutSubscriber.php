@@ -8,17 +8,15 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
 /**
- * Keycloak logout for Symfony 5.1 and later. Runs after the default logout
+ * Keycloak logout. Runs after the default logout
  * listener (which sets the target response) and before the session is
  * invalidated.
  */
 final class LogoutSubscriber implements EventSubscriberInterface
 {
-    private LogoutRedirect $redirect;
-
-    public function __construct(LogoutRedirect $redirect)
-    {
-        $this->redirect = $redirect;
+    public function __construct(
+        private LogoutRedirect $redirect,
+    ) {
     }
 
     /**

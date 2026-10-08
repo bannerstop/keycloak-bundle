@@ -55,8 +55,13 @@ final class PsrDefaultsPass implements CompilerPassInterface
         }
     }
 
-    private function factory(ContainerBuilder $container, string $id, ?string $configured, string $interface, string $httpClient): void
-    {
+    private function factory(
+        ContainerBuilder $container,
+        string $id,
+        ?string $configured,
+        string $interface,
+        string $httpClient,
+    ): void {
         if (null !== $configured) {
             $container->setAlias($id, $configured);
 

@@ -15,16 +15,13 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 /**
- * Access tokens in the Authorization header, for stateless API firewalls
- * (authenticator system, Symfony 5.3 and later).
+ * Access tokens in the Authorization header, for stateless API firewalls.
  */
 final class KeycloakBearerAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
-    private BearerHandler $handler;
-
-    public function __construct(BearerHandler $handler)
-    {
-        $this->handler = $handler;
+    public function __construct(
+        private BearerHandler $handler,
+    ) {
     }
 
     public function supports(Request $request): ?bool

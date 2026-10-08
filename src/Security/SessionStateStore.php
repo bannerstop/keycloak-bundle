@@ -17,11 +17,9 @@ final class SessionStateStore implements StateStore
     private const KEY = '_bannerstop_keycloak.logins';
     private const MAX_PENDING = 5;
 
-    private RequestStack $requestStack;
-
-    public function __construct(RequestStack $requestStack)
-    {
-        $this->requestStack = $requestStack;
+    public function __construct(
+        private RequestStack $requestStack,
+    ) {
     }
 
     public function save(PendingLogin $login): void

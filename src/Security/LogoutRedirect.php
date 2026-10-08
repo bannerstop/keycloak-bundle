@@ -17,17 +17,12 @@ use Symfony\Component\HttpFoundation\Request;
  */
 final class LogoutRedirect
 {
-    private KeycloakClient $client;
-    private SessionTokenStore $tokenStore;
-    private LoginHandler $loginHandler;
-    private string $logoutTarget;
-
-    public function __construct(KeycloakClient $client, SessionTokenStore $tokenStore, LoginHandler $loginHandler, string $logoutTarget)
-    {
-        $this->client = $client;
-        $this->tokenStore = $tokenStore;
-        $this->loginHandler = $loginHandler;
-        $this->logoutTarget = $logoutTarget;
+    public function __construct(
+        private KeycloakClient $client,
+        private SessionTokenStore $tokenStore,
+        private LoginHandler $loginHandler,
+        private string $logoutTarget,
+    ) {
     }
 
     /**
@@ -42,7 +37,7 @@ final class LogoutRedirect
         $this->tokenStore->clear($request);
         try {
             $url = $this->client->getLogoutUrl($this->loginHandler->absoluteUrl($request, $this->logoutTarget), $tokens->getIdToken());
-        } catch (HttpException $exception) {
+        } catch (HttpException) {
             return null;
         }
 

@@ -11,19 +11,16 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class TestController
 {
-    private TokenStorageInterface $tokenStorage;
-    private AuthenticationUtils $authenticationUtils;
-
-    public function __construct(TokenStorageInterface $tokenStorage, AuthenticationUtils $authenticationUtils)
-    {
-        $this->tokenStorage = $tokenStorage;
-        $this->authenticationUtils = $authenticationUtils;
+    public function __construct(
+        private TokenStorageInterface $tokenStorage,
+        private AuthenticationUtils $authenticationUtils,
+    ) {
     }
 
     public function me(): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
-        $user = null === $token ? null : $token->getUser();
+        $user = $token?->getUser();
         if (!$user instanceof KeycloakUser) {
             return new JsonResponse(['user' => null]);
         }
@@ -35,6 +32,6 @@ final class TestController
     {
         $error = $this->authenticationUtils->getLastAuthenticationError();
 
-        return new JsonResponse(['error' => null === $error ? null : $error->getMessageKey()]);
+        return new JsonResponse(['error' => $error?->getMessageKey()]);
     }
 }

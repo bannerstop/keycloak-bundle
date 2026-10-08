@@ -17,6 +17,7 @@ single sign-on with Keycloak for the Symfony security component.
 | 2.x     | ≥ 7.2   | 4.4 (Guard), 5.4 (Guard or authenticator system) |
 | 3.x     | ≥ 7.3   | 4.4 (Guard), 5.4 (Guard or authenticator system) |
 | 4.x     | ≥ 7.4   | 4.4 (Guard), 5.4 (Guard or authenticator system) |
+| 5.x     | ≥ 8.0   | 5.4, 6.x (authenticator system) |
 
 ## Installation
 
@@ -81,11 +82,9 @@ if you do not use `symfony/http-client`.
 
 ## Security
 
-### Symfony 5.4 (authenticator system)
-
 ```yaml
 security:
-    enable_authenticator_manager: true
+    enable_authenticator_manager: true # Symfony 5.4 only
     providers:
         keycloak:
             id: bannerstop_keycloak.user_provider
@@ -105,26 +104,6 @@ security:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
 ```
-
-### Symfony 4.4 (Guard)
-
-```yaml
-security:
-    providers:
-        keycloak:
-            id: bannerstop_keycloak.user_provider
-    firewalls:
-        main:
-            anonymous: true
-            provider: keycloak
-            guard:
-                authenticators: [bannerstop_keycloak.guard_authenticator]
-            logout:
-                path: app_logout
-                success_handler: bannerstop_keycloak.logout_success_handler
-```
-
-For APIs use `bannerstop_keycloak.bearer_guard_authenticator` the same way.
 
 ### Your own users
 

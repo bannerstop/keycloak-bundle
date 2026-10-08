@@ -15,15 +15,13 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 /**
- * Browser login for the authenticator system (Symfony 5.3 and later).
+ * Browser login: handles the callback and is the firewall's entry point.
  */
 final class KeycloakAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
-    private LoginHandler $handler;
-
-    public function __construct(LoginHandler $handler)
-    {
-        $this->handler = $handler;
+    public function __construct(
+        private LoginHandler $handler,
+    ) {
     }
 
     public function supports(Request $request): ?bool

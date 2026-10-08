@@ -14,10 +14,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '7.4'
-            symfony: '4.4.*'
-          - php: '8.4'
+          - php: '8.0'
             symfony: '5.4.*'
+          - php: '8.5'
+            symfony: '6.4.*'
     steps:
       - uses: actions/checkout@v4
       - name: Start Keycloak

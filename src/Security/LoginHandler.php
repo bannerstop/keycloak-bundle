@@ -16,11 +16,11 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * What both authenticator flavours (Guard and the authenticator system) do
- * with a login callback.
+ * What the authenticator does with a login callback.
  *
  * @internal
  */
@@ -30,33 +30,16 @@ final class LoginHandler
     public const CALLBACK_ROUTE = 'bannerstop_keycloak_callback';
     private const RETURN_TO = '_bannerstop_keycloak.return_to';
 
-    private LoginFlow $flow;
-    private RoleMapper $roleMapper;
-    private UserProvisioner $provisioner;
-    private SessionTokenStore $tokenStore;
-    private UrlGeneratorInterface $urlGenerator;
-    private ?LoggerInterface $logger;
-    private string $defaultTargetPath;
-    private string $failurePath;
-
     public function __construct(
-        LoginFlow $flow,
-        RoleMapper $roleMapper,
-        UserProvisioner $provisioner,
-        SessionTokenStore $tokenStore,
-        UrlGeneratorInterface $urlGenerator,
-        ?LoggerInterface $logger,
-        string $defaultTargetPath,
-        string $failurePath
+        private LoginFlow $flow,
+        private RoleMapper $roleMapper,
+        private UserProvisioner $provisioner,
+        private SessionTokenStore $tokenStore,
+        private UrlGeneratorInterface $urlGenerator,
+        private ?LoggerInterface $logger,
+        private string $defaultTargetPath,
+        private string $failurePath,
     ) {
-        $this->flow = $flow;
-        $this->roleMapper = $roleMapper;
-        $this->provisioner = $provisioner;
-        $this->tokenStore = $tokenStore;
-        $this->urlGenerator = $urlGenerator;
-        $this->logger = $logger;
-        $this->defaultTargetPath = $defaultTargetPath;
-        $this->failurePath = $failurePath;
     }
 
     public function isCallback(Request $request): bool
@@ -97,7 +80,9 @@ final class LoginHandler
     public function onFailure(Request $request, AuthenticationException $exception): RedirectResponse
     {
         if ($request->hasSession()) {
-            $request->getSession()->set(Security::AUTHENTICATION_ERROR, $exception);
+            // SecurityRequestAttributes replaced Security in Symfony 6.2
+            $key = class_exists(SecurityRequestAttributes::class) ? SecurityRequestAttributes::AUTHENTICATION_ERROR : Security::AUTHENTICATION_ERROR;
+            $request->getSession()->set($key, $exception);
         }
 
         return new RedirectResponse($this->path($this->failurePath));

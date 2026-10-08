@@ -12,24 +12,17 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * A user that lives only in the session, for applications without their own
  * user table. The identifier is the Keycloak subject.
  */
-final class KeycloakUser implements UserInterface, EquatableInterface
+final class KeycloakUser implements UserInterface, EquatableInterface, \Stringable
 {
-    private string $subject;
-    private ?string $email;
-    private string $displayName;
-
-    /** @var string[] */
-    private array $roles;
-
     /**
      * @param string[] $roles
      */
-    public function __construct(string $subject, ?string $email, string $displayName, array $roles)
-    {
-        $this->subject = $subject;
-        $this->email = $email;
-        $this->displayName = $displayName;
-        $this->roles = $roles;
+    public function __construct(
+        private string $subject,
+        private ?string $email,
+        private string $displayName,
+        private array $roles,
+    ) {
     }
 
     /**

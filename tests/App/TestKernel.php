@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bannerstop\KeycloakBundle\Tests\App;
 
 use Bannerstop\KeycloakBundle\BannerstopKeycloakBundle;
+use Composer\InstalledVersions;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -12,25 +13,16 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 
 final class TestKernel extends Kernel
 {
-    /** @var array<string, mixed> */
-    private array $keycloakConfig;
-
     /**
      * @param array<string, mixed> $keycloakConfig
      */
-    public function __construct(array $keycloakConfig)
-    {
-        $this->keycloakConfig = $keycloakConfig;
+    public function __construct(
+        private array $keycloakConfig,
+    ) {
         parent::__construct('test', true);
-    }
-
-    public static function usesAuthenticatorManager(): bool
-    {
-        return self::VERSION_ID >= 50300 && class_exists(AbstractAuthenticator::class);
     }
 
     public function registerBundles(): iterable
@@ -56,11 +48,10 @@ final class TestKernel extends Kernel
     public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         $loader->load(function (ContainerBuilder $container): void {
-            $session = self::VERSION_ID >= 50300 ? ['storage_factory_id' => 'session.storage.factory.mock_file'] : ['storage_id' => 'session.storage.mock_file'];
             $container->loadFromExtension('framework', [
                 'secret' => 'test',
                 'test' => true,
-                'session' => $session,
+                'session' => ['storage_factory_id' => 'session.storage.factory.mock_file'],
                 'router' => ['resource' => __DIR__ . '/routes.php', 'utf8' => true],
                 'http_client' => ['enabled' => true],
             ]);
@@ -78,40 +69,32 @@ final class TestKernel extends Kernel
      */
     private static function securityConfig(): array
     {
-        $modern = self::usesAuthenticatorManager();
-        $main = [
-            'pattern' => '^/',
-            'provider' => 'keycloak',
-            'logout' => ['path' => 'logout'],
-        ];
-        $api = [
-            'pattern' => '^/api/',
-            'provider' => 'keycloak',
-            'stateless' => true,
-        ];
-        if ($modern) {
-            $main['custom_authenticators'] = ['bannerstop_keycloak.authenticator'];
-            $api['custom_authenticators'] = ['bannerstop_keycloak.bearer_authenticator'];
-            $main['lazy'] = true;
-        } else {
-            $main['guard'] = ['authenticators' => ['bannerstop_keycloak.guard_authenticator']];
-            $main['logout']['success_handler'] = 'bannerstop_keycloak.logout_success_handler';
-            $main['anonymous'] = true;
-            $api['guard'] = ['authenticators' => ['bannerstop_keycloak.bearer_guard_authenticator']];
-            $api['anonymous'] = true;
-        }
-
         $config = [
             'providers' => ['keycloak' => ['id' => 'bannerstop_keycloak.user_provider']],
-            'firewalls' => ['api' => $api, 'main' => $main],
+            'firewalls' => [
+                'api' => [
+                    'pattern' => '^/api/',
+                    'provider' => 'keycloak',
+                    'stateless' => true,
+                    'custom_authenticators' => ['bannerstop_keycloak.bearer_authenticator'],
+                ],
+                'main' => [
+                    'pattern' => '^/',
+                    'lazy' => true,
+                    'provider' => 'keycloak',
+                    'custom_authenticators' => ['bannerstop_keycloak.authenticator'],
+                    'logout' => ['path' => 'logout'],
+                ],
+            ],
             'access_control' => [
-                ['path' => '^/login', 'roles' => $modern ? 'PUBLIC_ACCESS' : 'IS_AUTHENTICATED_ANONYMOUSLY'],
-                ['path' => '^/public', 'roles' => $modern ? 'PUBLIC_ACCESS' : 'IS_AUTHENTICATED_ANONYMOUSLY'],
+                ['path' => '^/login', 'roles' => 'PUBLIC_ACCESS'],
+                ['path' => '^/public', 'roles' => 'PUBLIC_ACCESS'],
                 ['path' => '^/admin', 'roles' => 'ROLE_ADMIN'],
                 ['path' => '^/', 'roles' => 'ROLE_USER'],
             ],
         ];
-        if ($modern && self::VERSION_ID < 60000) {
+        // required on Symfony 5.4, deprecated from 6.2 on
+        if (version_compare((string) InstalledVersions::getVersion('symfony/security-bundle'), '6.0', '<')) {
             $config['enable_authenticator_manager'] = true;
         }
 
