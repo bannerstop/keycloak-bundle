@@ -20,6 +20,7 @@ single sign-on with Keycloak for the Symfony security component.
 | 5.x     | ≥ 8.0   | 5.4, 6.x (authenticator system) |
 | 6.x     | ≥ 8.1   | 5.4, 6.4 |
 | 7.x     | ≥ 8.2   | 6.4, 7.x |
+| 8.x     | ≥ 8.3   | 6.4, 7.x |
 
 ## Installation
 

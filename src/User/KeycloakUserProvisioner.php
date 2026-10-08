@@ -12,6 +12,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class KeycloakUserProvisioner implements UserProvisioner
 {
+    #[\Override]
     public function provision(Identity $identity, array $roles): UserInterface
     {
         return KeycloakUser::fromIdentity($identity, $roles);

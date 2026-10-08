@@ -11,6 +11,7 @@ namespace Bannerstop\KeycloakBundle\Tests;
  */
 final class KeycloakLoginTest extends KeycloakTestCase
 {
+    #[\Override]
     protected function setUp(): void
     {
         if (false === getenv('KEYCLOAK_URL')) {

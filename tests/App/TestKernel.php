@@ -24,26 +24,31 @@ final class TestKernel extends Kernel
         parent::__construct('test', true);
     }
 
+    #[\Override]
     public function registerBundles(): iterable
     {
         return [new FrameworkBundle(), new SecurityBundle(), new BannerstopKeycloakBundle()];
     }
 
+    #[\Override]
     public function getProjectDir(): string
     {
         return __DIR__;
     }
 
+    #[\Override]
     public function getCacheDir(): string
     {
         return sys_get_temp_dir() . '/bannerstop-keycloak-bundle/' . md5((string) json_encode($this->keycloakConfig)) . '/cache';
     }
 
+    #[\Override]
     public function getLogDir(): string
     {
         return sys_get_temp_dir() . '/bannerstop-keycloak-bundle/logs';
     }
 
+    #[\Override]
     public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         $loader->load(function (ContainerBuilder $container): void {

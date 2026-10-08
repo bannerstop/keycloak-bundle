@@ -33,6 +33,7 @@ final readonly class KeycloakUser implements UserInterface, EquatableInterface, 
         return new self($identity->getSubject(), $identity->getEmail(), $identity->getDisplayName(), $roles);
     }
 
+    #[\Override]
     public function getUserIdentifier(): string
     {
         return $this->subject;
@@ -56,21 +57,25 @@ final readonly class KeycloakUser implements UserInterface, EquatableInterface, 
     /**
      * @return string[]
      */
+    #[\Override]
     public function getRoles(): array
     {
         return $this->roles;
     }
 
     #[\Deprecated]
+    #[\Override]
     public function eraseCredentials(): void
     {
     }
 
+    #[\Override]
     public function isEqualTo(UserInterface $user): bool
     {
         return $user instanceof self && $user->subject === $this->subject && $user->roles === $this->roles;
     }
 
+    #[\Override]
     public function __toString(): string
     {
         return $this->displayName;

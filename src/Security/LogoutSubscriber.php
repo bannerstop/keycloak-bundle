@@ -22,6 +22,7 @@ final readonly class LogoutSubscriber implements EventSubscriberInterface
     /**
      * @return array<string, array{0: string, 1: int}>
      */
+    #[\Override]
     public static function getSubscribedEvents(): array
     {
         return [LogoutEvent::class => ['onLogout', 32]];

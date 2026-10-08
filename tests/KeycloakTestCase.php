@@ -13,6 +13,7 @@ abstract class KeycloakTestCase extends TestCase
 {
     protected ?TestKernel $kernel = null;
 
+    #[\Override]
     protected function tearDown(): void
     {
         if (null !== $this->kernel) {

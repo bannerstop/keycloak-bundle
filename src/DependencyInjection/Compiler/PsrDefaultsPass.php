@@ -25,6 +25,7 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 final class PsrDefaultsPass implements CompilerPassInterface
 {
+    #[\Override]
     public function process(ContainerBuilder $container): void
     {
         if (!$container->hasParameter('bannerstop_keycloak.psr')) {

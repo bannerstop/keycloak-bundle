@@ -3,6 +3,11 @@
 The project follows [Semantic Versioning](https://semver.org/). Each major
 version raises the minimum PHP version and the supported Symfony versions.
 
+## 8.0.0
+
+- Requires PHP 8.3 or later and bannerstop/keycloak 8.
+- Typed class constants and `#[\Override]` on every implemented framework method.
+
 ## 7.0.0
 
 - Requires PHP 8.2 or later, bannerstop/keycloak 7 and Symfony 6.4 or 7.

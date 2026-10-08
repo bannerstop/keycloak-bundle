@@ -25,9 +25,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final readonly class LoginHandler
 {
-    public const LOGIN_ROUTE = 'bannerstop_keycloak_login';
-    public const CALLBACK_ROUTE = 'bannerstop_keycloak_callback';
-    private const RETURN_TO = '_bannerstop_keycloak.return_to';
+    public const string LOGIN_ROUTE = 'bannerstop_keycloak_login';
+    public const string CALLBACK_ROUTE = 'bannerstop_keycloak_callback';
+    private const string RETURN_TO = '_bannerstop_keycloak.return_to';
 
     public function __construct(
         private LoginFlow $flow,

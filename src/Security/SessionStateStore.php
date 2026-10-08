@@ -14,14 +14,15 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
  */
 final readonly class SessionStateStore implements StateStore
 {
-    private const KEY = '_bannerstop_keycloak.logins';
-    private const MAX_PENDING = 5;
+    private const string KEY = '_bannerstop_keycloak.logins';
+    private const int MAX_PENDING = 5;
 
     public function __construct(
         private RequestStack $requestStack,
     ) {
     }
 
+    #[\Override]
     public function save(PendingLogin $login): void
     {
         $session = $this->session();
@@ -30,6 +31,7 @@ final readonly class SessionStateStore implements StateStore
         $session->set(self::KEY, array_slice($pending, -self::MAX_PENDING, null, true));
     }
 
+    #[\Override]
     public function take(string $state): ?PendingLogin
     {
         $session = $this->session();

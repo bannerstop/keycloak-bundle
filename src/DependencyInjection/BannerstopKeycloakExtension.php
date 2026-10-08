@@ -35,14 +35,15 @@ use Symfony\Component\DependencyInjection\Reference;
  */
 final class BannerstopKeycloakExtension extends Extension
 {
-    public const HTTP_CLIENT = 'bannerstop_keycloak.http_client';
-    public const REQUEST_FACTORY = 'bannerstop_keycloak.request_factory';
-    public const STREAM_FACTORY = 'bannerstop_keycloak.stream_factory';
-    public const CACHE = 'bannerstop_keycloak.cache';
+    public const string HTTP_CLIENT = 'bannerstop_keycloak.http_client';
+    public const string REQUEST_FACTORY = 'bannerstop_keycloak.request_factory';
+    public const string STREAM_FACTORY = 'bannerstop_keycloak.stream_factory';
+    public const string CACHE = 'bannerstop_keycloak.cache';
 
     /**
      * @param array<mixed> $configs
      */
+    #[\Override]
     public function load(array $configs, ContainerBuilder $container): void
     {
         $config = $this->processConfiguration(new Configuration(), $configs);
@@ -142,6 +143,7 @@ final class BannerstopKeycloakExtension extends Extension
             ->addTag('kernel.event_subscriber');
     }
 
+    #[\Override]
     public function getAlias(): string
     {
         return 'bannerstop_keycloak';

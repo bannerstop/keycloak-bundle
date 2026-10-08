@@ -24,11 +24,13 @@ final class KeycloakBearerAuthenticator extends AbstractAuthenticator implements
     ) {
     }
 
+    #[\Override]
     public function supports(Request $request): ?bool
     {
         return null !== $this->handler->token($request);
     }
 
+    #[\Override]
     public function authenticate(Request $request): Passport
     {
         $user = $this->handler->authenticate((string) $this->handler->token($request));
@@ -36,16 +38,19 @@ final class KeycloakBearerAuthenticator extends AbstractAuthenticator implements
         return new SelfValidatingPassport(new UserBadge($user->getUserIdentifier(), static fn () => $user));
     }
 
+    #[\Override]
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         return null;
     }
 
+    #[\Override]
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         return $this->handler->challenge($exception);
     }
 
+    #[\Override]
     public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
         return $this->handler->challenge(null);

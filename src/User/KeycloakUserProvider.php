@@ -15,6 +15,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
  */
 final class KeycloakUserProvider implements UserProviderInterface
 {
+    #[\Override]
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
         $exception = new UserNotFoundException('KeycloakUser objects cannot be loaded by identifier.');
@@ -23,6 +24,7 @@ final class KeycloakUserProvider implements UserProviderInterface
         throw $exception;
     }
 
+    #[\Override]
     public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof KeycloakUser) {
@@ -32,6 +34,7 @@ final class KeycloakUserProvider implements UserProviderInterface
         return $user;
     }
 
+    #[\Override]
     public function supportsClass(string $class): bool
     {
         return KeycloakUser::class === $class;

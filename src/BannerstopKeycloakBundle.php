@@ -10,6 +10,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 final class BannerstopKeycloakBundle extends Bundle
 {
+    #[\Override]
     public function build(ContainerBuilder $container): void
     {
         $container->addCompilerPass(new PsrDefaultsPass());

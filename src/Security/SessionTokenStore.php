@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 final class SessionTokenStore
 {
-    private const KEY = '_bannerstop_keycloak.tokens';
+    private const string KEY = '_bannerstop_keycloak.tokens';
 
     public function save(Request $request, TokenSet $tokens): void
     {

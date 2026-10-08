@@ -24,11 +24,13 @@ final class KeycloakAuthenticator extends AbstractAuthenticator implements Authe
     ) {
     }
 
+    #[\Override]
     public function supports(Request $request): ?bool
     {
         return $this->handler->isCallback($request);
     }
 
+    #[\Override]
     public function authenticate(Request $request): Passport
     {
         $user = $this->handler->finish($request);
@@ -36,16 +38,19 @@ final class KeycloakAuthenticator extends AbstractAuthenticator implements Authe
         return new SelfValidatingPassport(new UserBadge($user->getUserIdentifier(), static fn () => $user));
     }
 
+    #[\Override]
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         return $this->handler->onSuccess($request);
     }
 
+    #[\Override]
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         return $this->handler->onFailure($request, $exception);
     }
 
+    #[\Override]
     public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
         return $this->handler->start($request);
