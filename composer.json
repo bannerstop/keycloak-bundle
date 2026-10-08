@@ -11,8 +11,8 @@
         }
     ],
     "require": {
-        "php": "^8.4",
-        "bannerstop/keycloak": "^9.0",
+        "php": "^8.5",
+        "bannerstop/keycloak": "^10.0",
         "symfony/config": "^7.4 || ^8.0",
         "symfony/dependency-injection": "^7.4 || ^8.0",
         "symfony/framework-bundle": "^7.4 || ^8.0",

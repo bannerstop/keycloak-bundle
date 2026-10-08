@@ -3,6 +3,10 @@
 Each major version raises the minimum PHP version and the supported Symfony
 versions. Only the steps that need changes in your code are listed.
 
+## 9.x → 10.x
+
+- PHP 8.5 or later is required. No code changes needed.
+
 ## 8.x → 9.x
 
 - PHP 8.4 or later and Symfony 7.4 or 8 are required.

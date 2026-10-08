@@ -3,6 +3,11 @@
 The project follows [Semantic Versioning](https://semver.org/). Each major
 version raises the minimum PHP version and the supported Symfony versions.
 
+## 10.0.0
+
+- Requires PHP 8.5 or later and bannerstop/keycloak 10.
+- Configured targets are told apart from route names with the URI extension instead of `filter_var()`.
+
 ## 9.0.0
 
 - Requires PHP 8.4 or later, bannerstop/keycloak 9 and Symfony 7.4 or 8.

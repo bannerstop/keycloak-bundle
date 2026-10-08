@@ -15,8 +15,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\SecurityRequestAttributes;
+use Uri\Rfc3986\Uri;
 
 /**
  * What the authenticator does with a login callback.
@@ -116,6 +117,7 @@ final readonly class LoginHandler
 
     private static function isRouteName(string $target): bool
     {
-        return !RedirectTarget::isLocal($target) && false === filter_var($target, FILTER_VALIDATE_URL);
+        // neither a local path nor an absolute URL like https://example.com/
+        return !RedirectTarget::isLocal($target) && null === Uri::parse($target)?->getScheme();
     }
 }
