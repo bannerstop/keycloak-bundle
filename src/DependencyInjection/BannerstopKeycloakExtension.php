@@ -22,6 +22,7 @@ use Bannerstop\KeycloakBundle\Security\SessionTokenStore;
 use Bannerstop\KeycloakBundle\User\KeycloakUserProvider;
 use Bannerstop\KeycloakBundle\User\KeycloakUserProvisioner;
 use Bannerstop\KeycloakBundle\User\UserProvisioner;
+use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -116,7 +117,7 @@ final class BannerstopKeycloakExtension extends Extension
 
         $container->register('bannerstop_keycloak.login_handler', LoginHandler::class)
             ->setArguments([
-                new Reference(LoginFlow::class),
+                new ServiceClosureArgument(new Reference(LoginFlow::class)),
                 new Reference(RoleMapper::class),
                 new Reference(UserProvisioner::class),
                 new Reference('bannerstop_keycloak.token_store'),
@@ -127,7 +128,7 @@ final class BannerstopKeycloakExtension extends Extension
             ]);
         $container->register('bannerstop_keycloak.bearer_handler', BearerHandler::class)
             ->setArguments([
-                new Reference(KeycloakClient::class),
+                new ServiceClosureArgument(new Reference(KeycloakClient::class)),
                 new Reference(RoleMapper::class),
                 new Reference(UserProvisioner::class),
                 $config['bearer']['audience'],
@@ -140,7 +141,7 @@ final class BannerstopKeycloakExtension extends Extension
 
         $container->register('bannerstop_keycloak.logout_redirect', LogoutRedirect::class)
             ->setArguments([
-                new Reference(KeycloakClient::class),
+                new ServiceClosureArgument(new Reference(KeycloakClient::class)),
                 new Reference('bannerstop_keycloak.token_store'),
                 new Reference('bannerstop_keycloak.login_handler'),
                 $config['login']['logout_target'],

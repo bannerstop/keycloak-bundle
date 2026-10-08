@@ -84,6 +84,7 @@ final class TestKernel extends Kernel
                     'provider' => 'keycloak',
                     'custom_authenticators' => ['bannerstop_keycloak.authenticator'],
                     'logout' => ['path' => 'logout'],
+            'remember_me' => ['secret' => 'test', 'always_remember_me' => true],
                 ],
             ],
             'access_control' => [
