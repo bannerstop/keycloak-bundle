@@ -3,6 +3,18 @@
 The project follows [Semantic Versioning](https://semver.org/). Each major
 version raises the minimum PHP version and the supported Symfony versions.
 
+## 10.1.1
+
+- Pages without a Keycloak login (the login page, form logins, public pages)
+  work again when the Keycloak settings are empty, e.g. in local setups: the
+  Keycloak client is now only built when a Keycloak route, a bearer token or a
+  Keycloak logout needs it.
+- Keycloak logins get a remember-me badge, so the firewall's `remember_me`
+  applies to them like to form logins.
+- After the login, users return to the page the firewall remembered (e.g. when
+  a `form_login` entry point sent them to the login page), not only to
+  `_target_path`. Remembered URLs of other hosts are ignored.
+
 ## 10.1.0
 
 - Optional `directory` client (`client_id`, `client_secret`) for the user
