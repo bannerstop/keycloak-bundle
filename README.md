@@ -71,6 +71,9 @@ bannerstop_keycloak:
     bearer:
         audience: 'my-api'          # defaults to the client id
 
+    session:                        # see "Ending sessions with Keycloak"
+        check_interval: 300         # seconds, 0 = back-channel logouts only; or '%env(int:KEYCLOAK_SESSION_CHECK_INTERVAL)%'
+
     directory:                      # optional, see below
         client_id: 'my-app-directory'
         client_secret: '%env(KEYCLOAK_DIRECTORY_CLIENT_SECRET)%'
@@ -169,6 +172,38 @@ from there on every request.
 `remember_me` on the firewall applies to Keycloak logins as well. Restoring a
 login from the cookie needs a user provider that can load the user, so it works
 with your own users, not with the session-only `KeycloakUser`.
+
+### Ending sessions with Keycloak
+
+Logging out of Keycloak, or of another application, does not end the
+Symfony session by itself. The bundle closes that gap in two ways:
+
+- **Back-channel logout**: Keycloak posts a signed logout token to
+  `/login/keycloak/backchannel-logout` when a session ends. The bundle verifies
+  it and records the ended Keycloak session in the cache (`cache`, default
+  `cache.app`, which must be shared by all web servers). In the Keycloak client
+  set *Backchannel logout URL* to `https://your-app.example/login/keycloak/backchannel-logout`
+  and turn on *Backchannel logout session required*. The route must be
+  reachable without a login; the `^/login` access rule above already covers it.
+- **Session check** (`session.check_interval`): every N seconds the refresh
+  token of the session is redeemed. Once Keycloak refuses it (logout
+  elsewhere, user disabled, SSO session expired), the session ends. If Keycloak
+  is unreachable, the session is kept.
+
+On the next request after its Keycloak session ended, a session is logged out
+(including the remember-me cookie): pages redirect to themselves, so the
+firewall's entry point asks for a new login, and XHR/JSON requests get a 401.
+Only sessions that came from a Keycloak login are checked. The remember-me cookie
+is cleared by its default name `REMEMBERME`; with a custom `remember_me.name`
+clear it yourself, e.g. in a logout listener.
+
+Keycloak does not always send a back-channel call for every session, e.g. when
+an administrator signs a user out of all sessions. Keep `check_interval`
+switched on as a safety net; 300 seconds is a good start.
+
+With Symfony 5.4, `symfony/cache` cannot be combined with `psr/simple-cache`
+3. In that combination the bundle cannot use a cache pool such as `cache.app`;
+require `psr/simple-cache` 1 or 2, or point `cache` to a PSR-16 service.
 
 ### Login errors
 
