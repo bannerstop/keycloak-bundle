@@ -45,6 +45,20 @@ final class Configuration implements ConfigurationInterface
                         ->scalarNode('audience')->defaultNull()->info('Audience access tokens must carry; defaults to the client id')->end()
                     ->end()
                 ->end()
+                ->arrayNode('directory')
+                    ->info('Separate confidential client for the user directory (admin API); defaults to the login client')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('client_id')->defaultNull()->end()
+                        ->scalarNode('client_secret')->defaultNull()->end()
+                    ->end()
+                    ->validate()
+                        ->ifTrue(static function (array $directory): bool {
+                            return null !== $directory['client_id'] && (null === $directory['client_secret'] || '' === $directory['client_secret']);
+                        })
+                        ->thenInvalid('The directory client needs a client_secret: the user directory works through its service account.')
+                    ->end()
+                ->end()
                 ->scalarNode('user_provisioner')->defaultNull()->info('Service id of a UserProvisioner; defaults to stateless KeycloakUser objects')->end()
             ->end();
 

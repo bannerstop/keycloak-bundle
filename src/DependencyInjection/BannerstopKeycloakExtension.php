@@ -84,8 +84,21 @@ final class BannerstopKeycloakExtension extends Extension
                 new Reference(self::CACHE, ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
             ->setPublic(true);
+        $directoryClient = KeycloakClient::class;
+        if (null !== $config['directory']['client_id']) {
+            $container->register('bannerstop_keycloak.directory_config', KeycloakConfig::class)
+                ->setFactory([KeycloakConfig::class, 'fromArray'])
+                ->setArguments([array_merge($container->getDefinition('bannerstop_keycloak.config')->getArgument(0), [
+                    'client_id' => $config['directory']['client_id'],
+                    'client_secret' => $config['directory']['client_secret'],
+                ])]);
+            $client = clone $container->getDefinition(KeycloakClient::class);
+            $client->replaceArgument(0, new Reference('bannerstop_keycloak.directory_config'))->setPublic(false);
+            $container->setDefinition('bannerstop_keycloak.directory_client', $client);
+            $directoryClient = 'bannerstop_keycloak.directory_client';
+        }
         $container->register(UserDirectory::class, UserDirectory::class)
-            ->setArguments([new Reference(KeycloakClient::class)])
+            ->setArguments([new Reference($directoryClient)])
             ->setPublic(true);
 
         $container->register(RoleMapper::class, RoleMapper::class)

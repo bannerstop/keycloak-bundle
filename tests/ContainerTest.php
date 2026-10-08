@@ -51,4 +51,12 @@ final class ContainerTest extends KeycloakTestCase
 
         $this->browser(self::config(['allowed_algorithms' => ['HS256']]));
     }
+
+    public function testDirectoryClientNeedsASecret(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('The directory client needs a client_secret');
+
+        $this->browser(self::config(['directory' => ['client_id' => 'app-directory']]));
+    }
 }
