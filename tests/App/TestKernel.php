@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bannerstop\KeycloakBundle\Tests\App;
 
 use Bannerstop\KeycloakBundle\BannerstopKeycloakBundle;
+use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -65,7 +66,7 @@ final class TestKernel extends Kernel
             ]);
             $container->loadFromExtension('bannerstop_keycloak', $this->keycloakConfig);
             $container->loadFromExtension('security', self::securityConfig());
-            $container->register('logger', \Psr\Log\NullLogger::class);
+            $container->register('logger', NullLogger::class);
             $container->register(TestController::class, TestController::class)
                 ->setArguments([new Reference('security.token_storage'), new Reference('security.authentication_utils')])
                 ->setPublic(true);
