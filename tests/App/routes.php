@@ -8,7 +8,7 @@ use Symfony\Component\Routing\RouteCollection;
 
 /** @var Symfony\Component\Routing\Loader\PhpFileLoader $loader */
 $routes = new RouteCollection();
-$routes->addCollection($loader->import('@BannerstopKeycloakBundle/Resources/config/routes.xml'));
+$routes->addCollection($loader->import('@BannerstopKeycloakBundle/Resources/config/routes.php'));
 $routes->add('me', new Route('/me', ['_controller' => TestController::class . '::me']));
 $routes->add('admin', new Route('/admin', ['_controller' => TestController::class . '::me']));
 $routes->add('api_me', new Route('/api/me', ['_controller' => TestController::class . '::me']));

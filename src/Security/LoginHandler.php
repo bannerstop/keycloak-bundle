@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -24,21 +23,21 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @internal
  */
-final class LoginHandler
+final readonly class LoginHandler
 {
     public const LOGIN_ROUTE = 'bannerstop_keycloak_login';
     public const CALLBACK_ROUTE = 'bannerstop_keycloak_callback';
     private const RETURN_TO = '_bannerstop_keycloak.return_to';
 
     public function __construct(
-        private readonly LoginFlow $flow,
-        private readonly RoleMapper $roleMapper,
-        private readonly UserProvisioner $provisioner,
-        private readonly SessionTokenStore $tokenStore,
-        private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly ?LoggerInterface $logger,
-        private readonly string $defaultTargetPath,
-        private readonly string $failurePath,
+        private LoginFlow $flow,
+        private RoleMapper $roleMapper,
+        private UserProvisioner $provisioner,
+        private SessionTokenStore $tokenStore,
+        private UrlGeneratorInterface $urlGenerator,
+        private ?LoggerInterface $logger,
+        private string $defaultTargetPath,
+        private string $failurePath,
     ) {
     }
 
@@ -78,9 +77,7 @@ final class LoginHandler
     public function onFailure(Request $request, AuthenticationException $exception): RedirectResponse
     {
         if ($request->hasSession()) {
-            // SecurityRequestAttributes replaced Security in Symfony 6.2
-            $key = class_exists(SecurityRequestAttributes::class) ? SecurityRequestAttributes::AUTHENTICATION_ERROR : Security::AUTHENTICATION_ERROR;
-            $request->getSession()->set($key, $exception);
+            $request->getSession()->set(SecurityRequestAttributes::AUTHENTICATION_ERROR, $exception);
         }
 
         return new RedirectResponse($this->path($this->failurePath));

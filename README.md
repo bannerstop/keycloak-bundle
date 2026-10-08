@@ -19,6 +19,7 @@ single sign-on with Keycloak for the Symfony security component.
 | 4.x     | ≥ 7.4   | 4.4 (Guard), 5.4 (Guard or authenticator system) |
 | 5.x     | ≥ 8.0   | 5.4, 6.x (authenticator system) |
 | 6.x     | ≥ 8.1   | 5.4, 6.4 |
+| 7.x     | ≥ 8.2   | 6.4, 7.x |
 
 ## Installation
 
@@ -37,7 +38,7 @@ Import the routes (`/login/keycloak` and `/login/keycloak/callback`), e.g. in
 
 ```yaml
 bannerstop_keycloak:
-    resource: '@BannerstopKeycloakBundle/Resources/config/routes.xml'
+    resource: '@BannerstopKeycloakBundle/Resources/config/routes.php'
 ```
 
 In Keycloak, register `https://your-app.example/login/keycloak/callback` as
@@ -85,7 +86,6 @@ if you do not use `symfony/http-client`.
 
 ```yaml
 security:
-    enable_authenticator_manager: true # Symfony 5.4 only
     providers:
         keycloak:
             id: bannerstop_keycloak.user_provider

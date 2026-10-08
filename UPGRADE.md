@@ -3,6 +3,13 @@
 Each major version raises the minimum PHP version and the supported Symfony
 versions. Only the steps that need changes in your code are listed.
 
+## 6.x → 7.x
+
+- PHP 8.2 or later and Symfony 6.4 or 7 are required.
+- Remove `enable_authenticator_manager` from `security.yaml`.
+- Use `KeycloakUser::getUserIdentifier()` instead of `getUsername()`.
+- Import `@BannerstopKeycloakBundle/Resources/config/routes.php` instead of `routes.xml` (XML routing is deprecated in Symfony 7.4).
+
 ## 5.x → 6.x
 
 - PHP 8.1 or later and Symfony 5.4 or 6.4 are required.

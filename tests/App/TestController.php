@@ -9,11 +9,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-final class TestController
+final readonly class TestController
 {
     public function __construct(
-        private readonly TokenStorageInterface $tokenStorage,
-        private readonly AuthenticationUtils $authenticationUtils,
+        private TokenStorageInterface $tokenStorage,
+        private AuthenticationUtils $authenticationUtils,
     ) {
     }
 

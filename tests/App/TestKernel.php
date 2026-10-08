@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Bannerstop\KeycloakBundle\Tests\App;
 
 use Bannerstop\KeycloakBundle\BannerstopKeycloakBundle;
-use Composer\InstalledVersions;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -51,10 +50,10 @@ final class TestKernel extends Kernel
             $container->loadFromExtension('framework', [
                 'secret' => 'test',
                 'test' => true,
-                'session' => ['storage_factory_id' => 'session.storage.factory.mock_file'],
+                'session' => ['storage_factory_id' => 'session.storage.factory.mock_file', 'handler_id' => null, 'cookie_secure' => 'auto', 'cookie_samesite' => 'lax'],
                 'router' => ['resource' => __DIR__ . '/routes.php', 'utf8' => true],
                 'http_client' => ['enabled' => true],
-            ]);
+            ] + self::frameworkDefaults());
             $container->loadFromExtension('bannerstop_keycloak', $this->keycloakConfig);
             $container->loadFromExtension('security', self::securityConfig());
             $container->register('logger', NullLogger::class);
@@ -65,11 +64,33 @@ final class TestKernel extends Kernel
     }
 
     /**
+     * Options whose defaults change between Symfony versions, set so that the
+     * test run shows no deprecations of the framework itself.
+     *
+     * @return array<string, mixed>
+     */
+    private static function frameworkDefaults(): array
+    {
+        if (self::VERSION_ID >= 70300) {
+            return ['property_info' => ['with_constructor_extractor' => true]];
+        }
+        if (self::VERSION_ID < 70000) {
+            return [
+                'http_method_override' => false,
+                'handle_all_throwables' => true,
+                'php_errors' => ['log' => true],
+            ];
+        }
+
+        return [];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private static function securityConfig(): array
     {
-        $config = [
+        return [
             'providers' => ['keycloak' => ['id' => 'bannerstop_keycloak.user_provider']],
             'firewalls' => [
                 'api' => [
@@ -93,11 +114,6 @@ final class TestKernel extends Kernel
                 ['path' => '^/', 'roles' => 'ROLE_USER'],
             ],
         ];
-        // required on Symfony 5.4, deprecated from 6.2 on
-        if (version_compare((string) InstalledVersions::getVersion('symfony/security-bundle'), '6.0', '<')) {
-            $config['enable_authenticator_manager'] = true;
-        }
-
         return $config;
     }
 }

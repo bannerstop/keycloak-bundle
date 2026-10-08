@@ -12,10 +12,10 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
  * listener (which sets the target response) and before the session is
  * invalidated.
  */
-final class LogoutSubscriber implements EventSubscriberInterface
+final readonly class LogoutSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private readonly LogoutRedirect $redirect,
+        private LogoutRedirect $redirect,
     ) {
     }
 

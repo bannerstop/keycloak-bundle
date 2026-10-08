@@ -3,6 +3,14 @@
 The project follows [Semantic Versioning](https://semver.org/). Each major
 version raises the minimum PHP version and the supported Symfony versions.
 
+## 7.0.0
+
+- Requires PHP 8.2 or later, bannerstop/keycloak 7 and Symfony 6.4 or 7.
+- Drops Symfony 5.4: `KeycloakUserProvider::loadUserByUsername()` and `KeycloakUser::getUsername()`, `getPassword()` and `getSalt()` are gone.
+- Login errors are stored under `SecurityRequestAttributes::AUTHENTICATION_ERROR`.
+- The routes ship as `Resources/config/routes.php`; `routes.xml` is kept for now, because Symfony 7.4 deprecates XML routing.
+- Readonly classes; bearer tokens are marked `#[\SensitiveParameter]`.
+
 ## 6.0.0
 
 - Requires PHP 8.1 or later, bannerstop/keycloak 6 and Symfony 5.4 or 6.4.

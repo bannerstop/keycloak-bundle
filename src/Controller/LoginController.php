@@ -11,15 +11,15 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-final class LoginController
+final readonly class LoginController
 {
     /**
      * @param array<string, string> $authorizationParameters
      */
     public function __construct(
-        private readonly LoginFlow $flow,
-        private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly array $authorizationParameters,
+        private LoginFlow $flow,
+        private UrlGeneratorInterface $urlGenerator,
+        private array $authorizationParameters,
     ) {
     }
 

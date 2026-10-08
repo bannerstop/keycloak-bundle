@@ -21,13 +21,13 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @internal
  */
-final class BearerHandler
+final readonly class BearerHandler
 {
     public function __construct(
-        private readonly KeycloakClient $client,
-        private readonly RoleMapper $roleMapper,
-        private readonly UserProvisioner $provisioner,
-        private readonly ?string $audience,
+        private KeycloakClient $client,
+        private RoleMapper $roleMapper,
+        private UserProvisioner $provisioner,
+        private ?string $audience,
     ) {
     }
 
@@ -39,7 +39,7 @@ final class BearerHandler
     /**
      * @throws AuthenticationException
      */
-    public function authenticate(string $token): UserInterface
+    public function authenticate(#[\SensitiveParameter] string $token): UserInterface
     {
         try {
             $identity = $this->client->verifyAccessToken($token, $this->audience);

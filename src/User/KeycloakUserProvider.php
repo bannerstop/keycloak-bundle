@@ -23,14 +23,6 @@ final class KeycloakUserProvider implements UserProviderInterface
         throw $exception;
     }
 
-    /**
-     * Symfony 5.4 only; later versions call loadUserByIdentifier().
-     */
-    public function loadUserByUsername(string $username): UserInterface
-    {
-        return $this->loadUserByIdentifier($username);
-    }
-
     public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof KeycloakUser) {

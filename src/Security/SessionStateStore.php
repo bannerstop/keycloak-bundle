@@ -12,13 +12,13 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 /**
  * Pending logins in the Symfony session, at most five at a time.
  */
-final class SessionStateStore implements StateStore
+final readonly class SessionStateStore implements StateStore
 {
     private const KEY = '_bannerstop_keycloak.logins';
     private const MAX_PENDING = 5;
 
     public function __construct(
-        private readonly RequestStack $requestStack,
+        private RequestStack $requestStack,
     ) {
     }
 
