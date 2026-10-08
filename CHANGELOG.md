@@ -3,6 +3,22 @@
 The project follows [Semantic Versioning](https://semver.org/). Each major
 version raises the minimum PHP version and the supported Symfony versions.
 
+## 2.3.0
+
+- Back-channel logout: `POST /login/keycloak/backchannel-logout` verifies
+  Keycloak's logout token and records the ended session; replayed tokens are
+  rejected.
+- Session check: the next request after a Keycloak session ended (back
+  channel, or refused refresh token every `session.check_interval` seconds)
+  logs the session out, including the remember-me cookie.
+- The `cache` option now works with `cache.app` and other cache pools:
+  their class was not recognised, so discovery and signing keys were fetched
+  on every request.
+  With Symfony 5.4, whose `symfony/cache` refuses to work next to
+  `psr/simple-cache` 3, the cache stays off in that combination instead of
+  failing.
+- Requires bannerstop/keycloak 2.1.
+
 ## 2.2.0
 
 - `login.allowed_email_domains` also takes a comma separated string, so the
