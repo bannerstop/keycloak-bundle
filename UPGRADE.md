@@ -3,6 +3,11 @@
 Each major version raises the minimum PHP version and the supported Symfony
 versions. Only the steps that need changes in your code are listed.
 
+## 8.x → 9.x
+
+- PHP 8.4 or later and Symfony 7.4 or 8 are required.
+- Import `@BannerstopKeycloakBundle/Resources/config/routes.php` if you still import `routes.xml`.
+
 ## 7.x → 8.x
 
 - PHP 8.3 or later is required. No code changes needed.

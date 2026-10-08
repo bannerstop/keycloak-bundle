@@ -63,8 +63,10 @@ final readonly class KeycloakUser implements UserInterface, EquatableInterface, 
         return $this->roles;
     }
 
+    /**
+     * Required by Symfony 7.4, gone from the interface in Symfony 8.
+     */
     #[\Deprecated]
-    #[\Override]
     public function eraseCredentials(): void
     {
     }

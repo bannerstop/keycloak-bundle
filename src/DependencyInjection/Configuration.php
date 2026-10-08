@@ -54,7 +54,7 @@ final class Configuration implements ConfigurationInterface
 
     private function loginNode(): ArrayNodeDefinition
     {
-        $node = (new TreeBuilder('login'))->getRootNode();
+        $node = new TreeBuilder('login')->getRootNode();
         $node
             ->addDefaultsIfNotSet()
             ->children()
@@ -75,7 +75,7 @@ final class Configuration implements ConfigurationInterface
 
     private function rolesNode(): ArrayNodeDefinition
     {
-        $node = (new TreeBuilder('roles'))->getRootNode();
+        $node = new TreeBuilder('roles')->getRootNode();
         $node
             ->addDefaultsIfNotSet()
             ->children()

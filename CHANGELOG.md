@@ -3,6 +3,14 @@
 The project follows [Semantic Versioning](https://semver.org/). Each major
 version raises the minimum PHP version and the supported Symfony versions.
 
+## 9.0.0
+
+- Requires PHP 8.4 or later, bannerstop/keycloak 9 and Symfony 7.4 or 8.
+- Drops Symfony 6.4 and 7.0 to 7.3.
+- `Resources/config/routes.xml` is gone; import `Resources/config/routes.php`.
+- `KeycloakUser::eraseCredentials()` is kept for Symfony 7.4 and marked `#[\Deprecated]`.
+- Tests run on PHPUnit 12.
+
 ## 8.0.0
 
 - Requires PHP 8.3 or later and bannerstop/keycloak 8.

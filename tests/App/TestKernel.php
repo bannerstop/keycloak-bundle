@@ -76,7 +76,7 @@ final class TestKernel extends Kernel
      */
     private static function frameworkDefaults(): array
     {
-        if (self::VERSION_ID >= 70300) {
+        if (self::VERSION_ID >= 70300 && self::VERSION_ID < 80000) {
             return ['property_info' => ['with_constructor_extractor' => true]];
         }
         if (self::VERSION_ID < 70000) {
