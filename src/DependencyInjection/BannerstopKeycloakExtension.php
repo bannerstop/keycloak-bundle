@@ -9,6 +9,8 @@ use Bannerstop\Keycloak\KeycloakClient;
 use Bannerstop\Keycloak\KeycloakConfig;
 use Bannerstop\Keycloak\Login\LoginFlow;
 use Bannerstop\Keycloak\Role\RoleMapper;
+use Bannerstop\Keycloak\Session\SessionCheck;
+use Bannerstop\KeycloakBundle\Controller\BackchannelLogoutController;
 use Bannerstop\KeycloakBundle\Controller\LoginController;
 use Bannerstop\KeycloakBundle\Security\BearerHandler;
 use Bannerstop\KeycloakBundle\Security\ConfiguredEmailDomainPolicy;
@@ -17,6 +19,7 @@ use Bannerstop\KeycloakBundle\Security\KeycloakBearerAuthenticator;
 use Bannerstop\KeycloakBundle\Security\LoginHandler;
 use Bannerstop\KeycloakBundle\Security\LogoutRedirect;
 use Bannerstop\KeycloakBundle\Security\LogoutSubscriber;
+use Bannerstop\KeycloakBundle\Security\SessionCheckListener;
 use Bannerstop\KeycloakBundle\Security\SessionStateStore;
 use Bannerstop\KeycloakBundle\Security\SessionTokenStore;
 use Bannerstop\KeycloakBundle\User\KeycloakUserProvider;
@@ -40,6 +43,7 @@ final class BannerstopKeycloakExtension extends Extension
     public const REQUEST_FACTORY = 'bannerstop_keycloak.request_factory';
     public const STREAM_FACTORY = 'bannerstop_keycloak.stream_factory';
     public const CACHE = 'bannerstop_keycloak.cache';
+    public const SESSION_REVOCATIONS = 'bannerstop_keycloak.session_revocations';
 
     /**
      * @param array<mixed> $configs
@@ -155,6 +159,29 @@ final class BannerstopKeycloakExtension extends Extension
         $container->register('bannerstop_keycloak.logout_subscriber', LogoutSubscriber::class)
             ->setArguments([new Reference('bannerstop_keycloak.logout_redirect')])
             ->addTag('kernel.event_subscriber');
+
+        // bannerstop_keycloak.session_revocations is registered by PsrDefaultsPass once it is clear whether a cache exists.
+        $container->setParameter('bannerstop_keycloak.session.revocation_ttl', $config['session']['revocation_ttl']);
+        $revocations = new Reference(self::SESSION_REVOCATIONS, ContainerInterface::NULL_ON_INVALID_REFERENCE);
+        $container->register('bannerstop_keycloak.session_check', SessionCheck::class)
+            ->setArguments([new Reference(KeycloakClient::class), $revocations, $config['session']['check_interval']]);
+        $container->register('bannerstop_keycloak.session_check_listener', SessionCheckListener::class)
+            ->setArguments([
+                new ServiceClosureArgument(new Reference('bannerstop_keycloak.session_check')),
+                new Reference('bannerstop_keycloak.token_store'),
+                new Reference('security.token_storage'),
+                new Reference('security.helper', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                new Reference('router'),
+            ])
+            ->addTag('kernel.event_subscriber');
+        $container->register('bannerstop_keycloak.backchannel_logout_controller', BackchannelLogoutController::class)
+            ->setArguments([
+                new ServiceClosureArgument(new Reference(KeycloakClient::class)),
+                $revocations,
+                new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->setPublic(true)
+            ->addTag('controller.service_arguments');
     }
 
     public function getAlias(): string
