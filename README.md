@@ -55,6 +55,8 @@ bannerstop_keycloak:
     client_secret: '%env(KEYCLOAK_CLIENT_SECRET)%'
 
     login:
+        # a list, or a comma separated string from the environment:
+        # allowed_email_domains: '%env(KEYCLOAK_ALLOWED_EMAIL_DOMAINS)%'
         allowed_email_domains: ['example.com'] # empty: everybody in the realm
         default_target_path: '/'
         failure_path: 'app_login'   # route or path; shows the error via AuthenticationUtils
