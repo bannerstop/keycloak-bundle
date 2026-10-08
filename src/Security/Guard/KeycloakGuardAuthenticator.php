@@ -59,7 +59,7 @@ final class KeycloakGuardAuthenticator extends AbstractGuardAuthenticator
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey): ?Response
     {
-        return $this->handler->onSuccess($request);
+        return $this->handler->onSuccess($request, (string) $providerKey);
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
@@ -72,8 +72,11 @@ final class KeycloakGuardAuthenticator extends AbstractGuardAuthenticator
         return $this->handler->start($request);
     }
 
+    /**
+     * Only takes effect if the firewall has remember_me configured.
+     */
     public function supportsRememberMe(): bool
     {
-        return false;
+        return true;
     }
 }

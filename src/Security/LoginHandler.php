@@ -17,6 +17,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 /**
  * What both authenticator flavours (Guard and the authenticator system) do
@@ -26,11 +27,13 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class LoginHandler
 {
+    use TargetPathTrait;
+
     public const LOGIN_ROUTE = 'bannerstop_keycloak_login';
     public const CALLBACK_ROUTE = 'bannerstop_keycloak_callback';
     private const RETURN_TO = '_bannerstop_keycloak.return_to';
 
-    private LoginFlow $flow;
+    private \Closure $flow;
     private RoleMapper $roleMapper;
     private UserProvisioner $provisioner;
     private SessionTokenStore $tokenStore;
@@ -39,8 +42,11 @@ final class LoginHandler
     private string $defaultTargetPath;
     private string $failurePath;
 
+    /**
+     * @param \Closure(): LoginFlow $flow Built on first use, so that pages without a Keycloak login work without Keycloak settings
+     */
     public function __construct(
-        LoginFlow $flow,
+        \Closure $flow,
         RoleMapper $roleMapper,
         UserProvisioner $provisioner,
         SessionTokenStore $tokenStore,
@@ -70,7 +76,7 @@ final class LoginHandler
     public function finish(Request $request): UserInterface
     {
         try {
-            $result = $this->flow->finish($request->query->all());
+            $result = ($this->flow)()->finish($request->query->all());
         } catch (LoginException $exception) {
             if (null !== $this->logger) {
                 $this->logger->notice('Keycloak login failed: {message}', ['message' => $exception->getMessage(), 'reason' => $exception->getReason()]);
@@ -87,11 +93,25 @@ final class LoginHandler
         return $user;
     }
 
-    public function onSuccess(Request $request): RedirectResponse
+    /**
+     * Back to the page the login started from: the "_target_path" of the
+     * login route, else the page the firewall remembered when it asked for a
+     * login (e.g. through a form_login entry point), else the default.
+     */
+    public function onSuccess(Request $request, string $firewallName): RedirectResponse
     {
         $returnTo = $request->attributes->get(self::RETURN_TO);
+        if (is_string($returnTo) && RedirectTarget::isLocal($returnTo)) {
+            return new RedirectResponse($returnTo);
+        }
+        $remembered = $request->hasSession() ? $this->getTargetPath($request->getSession(), $firewallName) : null;
+        if (null !== $remembered && 0 === strpos($remembered, $request->getSchemeAndHttpHost() . '/')) {
+            $this->removeTargetPath($request->getSession(), $firewallName);
 
-        return new RedirectResponse(is_string($returnTo) && RedirectTarget::isLocal($returnTo) ? $returnTo : $this->path($this->defaultTargetPath));
+            return new RedirectResponse($remembered);
+        }
+
+        return new RedirectResponse($this->path($this->defaultTargetPath));
     }
 
     public function onFailure(Request $request, AuthenticationException $exception): RedirectResponse
