@@ -11,8 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Client;
 
 abstract class KeycloakTestCase extends TestCase
 {
-    /** @var TestKernel|null */
-    protected $kernel;
+    protected ?TestKernel $kernel = null;
 
     protected function tearDown(): void
     {

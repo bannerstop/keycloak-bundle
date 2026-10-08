@@ -17,7 +17,7 @@ use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 final class TestKernel extends Kernel
 {
     /** @var array<string, mixed> */
-    private $keycloakConfig;
+    private array $keycloakConfig;
 
     /**
      * @param array<string, mixed> $keycloakConfig

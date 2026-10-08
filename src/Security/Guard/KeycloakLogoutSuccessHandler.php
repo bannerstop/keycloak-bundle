@@ -15,8 +15,7 @@ use Symfony\Component\Security\Http\Logout\LogoutSuccessHandlerInterface;
  */
 final class KeycloakLogoutSuccessHandler implements LogoutSuccessHandlerInterface
 {
-    /** @var LogoutRedirect */
-    private $redirect;
+    private LogoutRedirect $redirect;
 
     public function __construct(LogoutRedirect $redirect)
     {

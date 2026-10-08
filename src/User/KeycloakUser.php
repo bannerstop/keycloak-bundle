@@ -14,17 +14,12 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class KeycloakUser implements UserInterface, EquatableInterface
 {
-    /** @var string */
-    private $subject;
-
-    /** @var string|null */
-    private $email;
-
-    /** @var string */
-    private $displayName;
+    private string $subject;
+    private ?string $email;
+    private string $displayName;
 
     /** @var string[] */
-    private $roles;
+    private array $roles;
 
     /**
      * @param string[] $roles

@@ -19,8 +19,7 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
  */
 final class KeycloakBearerGuardAuthenticator extends AbstractGuardAuthenticator
 {
-    /** @var BearerHandler */
-    private $handler;
+    private BearerHandler $handler;
 
     public function __construct(BearerHandler $handler)
     {

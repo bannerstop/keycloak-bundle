@@ -23,17 +23,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class BearerHandler
 {
-    /** @var KeycloakClient */
-    private $client;
-
-    /** @var RoleMapper */
-    private $roleMapper;
-
-    /** @var UserProvisioner */
-    private $provisioner;
-
-    /** @var string|null */
-    private $audience;
+    private KeycloakClient $client;
+    private RoleMapper $roleMapper;
+    private UserProvisioner $provisioner;
+    private ?string $audience;
 
     public function __construct(KeycloakClient $client, RoleMapper $roleMapper, UserProvisioner $provisioner, ?string $audience)
     {

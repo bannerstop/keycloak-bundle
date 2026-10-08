@@ -18,8 +18,7 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
  */
 final class KeycloakGuardAuthenticator extends AbstractGuardAuthenticator
 {
-    /** @var LoginHandler */
-    private $handler;
+    private LoginHandler $handler;
 
     public function __construct(LoginHandler $handler)
     {

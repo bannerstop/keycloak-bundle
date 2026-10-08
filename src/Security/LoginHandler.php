@@ -30,29 +30,14 @@ final class LoginHandler
     public const CALLBACK_ROUTE = 'bannerstop_keycloak_callback';
     private const RETURN_TO = '_bannerstop_keycloak.return_to';
 
-    /** @var LoginFlow */
-    private $flow;
-
-    /** @var RoleMapper */
-    private $roleMapper;
-
-    /** @var UserProvisioner */
-    private $provisioner;
-
-    /** @var SessionTokenStore */
-    private $tokenStore;
-
-    /** @var UrlGeneratorInterface */
-    private $urlGenerator;
-
-    /** @var LoggerInterface|null */
-    private $logger;
-
-    /** @var string */
-    private $defaultTargetPath;
-
-    /** @var string */
-    private $failurePath;
+    private LoginFlow $flow;
+    private RoleMapper $roleMapper;
+    private UserProvisioner $provisioner;
+    private SessionTokenStore $tokenStore;
+    private UrlGeneratorInterface $urlGenerator;
+    private ?LoggerInterface $logger;
+    private string $defaultTargetPath;
+    private string $failurePath;
 
     public function __construct(
         LoginFlow $flow,

@@ -13,14 +13,11 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class LoginController
 {
-    /** @var LoginFlow */
-    private $flow;
-
-    /** @var UrlGeneratorInterface */
-    private $urlGenerator;
+    private LoginFlow $flow;
+    private UrlGeneratorInterface $urlGenerator;
 
     /** @var array<string, string> */
-    private $authorizationParameters;
+    private array $authorizationParameters;
 
     /**
      * @param array<string, string> $authorizationParameters

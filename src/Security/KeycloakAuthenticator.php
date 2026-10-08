@@ -19,8 +19,7 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
  */
 final class KeycloakAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
-    /** @var LoginHandler */
-    private $handler;
+    private LoginHandler $handler;
 
     public function __construct(LoginHandler $handler)
     {
@@ -36,9 +35,7 @@ final class KeycloakAuthenticator extends AbstractAuthenticator implements Authe
     {
         $user = $this->handler->finish($request);
 
-        return new SelfValidatingPassport(new UserBadge($user->getUserIdentifier(), static function () use ($user) {
-            return $user;
-        }));
+        return new SelfValidatingPassport(new UserBadge($user->getUserIdentifier(), static fn () => $user));
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response

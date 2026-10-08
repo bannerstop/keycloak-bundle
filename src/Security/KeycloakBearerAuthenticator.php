@@ -20,8 +20,7 @@ use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface
  */
 final class KeycloakBearerAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
-    /** @var BearerHandler */
-    private $handler;
+    private BearerHandler $handler;
 
     public function __construct(BearerHandler $handler)
     {
@@ -37,9 +36,7 @@ final class KeycloakBearerAuthenticator extends AbstractAuthenticator implements
     {
         $user = $this->handler->authenticate((string) $this->handler->token($request));
 
-        return new SelfValidatingPassport(new UserBadge($user->getUserIdentifier(), static function () use ($user) {
-            return $user;
-        }));
+        return new SelfValidatingPassport(new UserBadge($user->getUserIdentifier(), static fn () => $user));
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
