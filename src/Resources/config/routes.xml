@@ -5,4 +5,5 @@
 
     <route id="bannerstop_keycloak_login" path="/login/keycloak" controller="bannerstop_keycloak.login_controller::start" methods="GET" />
     <route id="bannerstop_keycloak_callback" path="/login/keycloak/callback" controller="bannerstop_keycloak.login_controller::callback" methods="GET" />
+    <route id="bannerstop_keycloak_backchannel_logout" path="/login/keycloak/backchannel-logout" controller="bannerstop_keycloak.backchannel_logout_controller" methods="POST" />
 </routes>

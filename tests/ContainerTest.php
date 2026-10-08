@@ -20,6 +20,7 @@ final class ContainerTest extends KeycloakTestCase
         self::assertSame(self::config()['server_url'] . '/realms/example', $client->getConfig()->getIssuer());
         self::assertInstanceOf(LoginFlow::class, $container->get(LoginFlow::class));
         self::assertInstanceOf(RoleMapper::class, $container->get(RoleMapper::class));
+        self::assertTrue($container->get('test.service_container')->has('bannerstop_keycloak.cache'), 'cache.app is used to cache discovery, keys and revocations.');
     }
 
     public function testAnonymousUsersAreSentToTheLogin(): void
