@@ -197,6 +197,10 @@ The provisioner hands Symfony the user at login; on every following request
 Symfony reloads it through the firewall's provider. That provider must
 therefore return the same entity class.
 
+`remember_me` on the firewall applies to Keycloak logins as well. It needs a
+user with a password property or other `signature_properties`, so it works with
+your own users, not with the session-only `KeycloakUser`.
+
 ### Login errors
 
 A failed login redirects to `failure_path`. `AuthenticationUtils::getLastAuthenticationError()`
