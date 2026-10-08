@@ -31,6 +31,9 @@ final class PsrDefaultsPass implements CompilerPassInterface
             return;
         }
         $psr = $container->getParameter('bannerstop_keycloak.psr');
+        if (!is_array($psr)) {
+            return;
+        }
 
         if (!$container->has($psr['http_client'])) {
             throw new LogicException(sprintf('bannerstop_keycloak needs a PSR-18 HTTP client, service "%s" does not exist. Install symfony/http-client and nyholm/psr7, or set "http_client".', $psr['http_client']));
