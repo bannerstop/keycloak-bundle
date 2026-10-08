@@ -3,6 +3,12 @@
 The project follows [Semantic Versioning](https://semver.org/). Each major
 version raises the minimum PHP version and the supported Symfony versions.
 
+## 7.1.0
+
+- Optional `directory` client (`client_id`, `client_secret`) for the user
+  directory, so that the login client needs no admin API rights. Without it,
+  the login client is used as before.
+
 ## 7.0.0
 
 - Requires PHP 8.2 or later, bannerstop/keycloak 7 and Symfony 6.4 or 7.
