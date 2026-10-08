@@ -32,6 +32,7 @@ final class KeycloakLoginTest extends KeycloakTestCase
 
         $browser->request('GET', '/login/keycloak/callback?' . http_build_query(self::keycloakLogin($authorizationUrl)));
         self::assertSame('/me', $browser->getResponse()->headers->get('Location'));
+        self::assertContains('REMEMBERME', array_map(static fn ($cookie): string => $cookie->getName(), $browser->getResponse()->headers->getCookies()), 'The firewall\'s remember_me applies to Keycloak logins.');
 
         $browser->request('GET', '/me');
         $me = json_decode((string) $browser->getResponse()->getContent(), true);
@@ -62,6 +63,35 @@ final class KeycloakLoginTest extends KeycloakTestCase
         $browser->request('GET', '/admin');
 
         self::assertSame(403, $browser->getResponse()->getStatusCode());
+    }
+
+    public function testReturnsToThePageTheFirewallRemembered(): void
+    {
+        $browser = $this->browser(self::config());
+        $browser->request('GET', '/login/keycloak');
+        $authorizationUrl = (string) $browser->getResponse()->headers->get('Location');
+        // what a form_login entry point leaves behind when it sends a user to the login page
+        $session = $browser->getRequest()->getSession();
+        $session->set('_security.main.target_path', 'http://localhost/admin?tab=2');
+        $session->save();
+
+        $browser->request('GET', '/login/keycloak/callback?' . http_build_query(self::keycloakLogin($authorizationUrl)));
+
+        self::assertSame('http://localhost/admin?tab=2', $browser->getResponse()->headers->get('Location'));
+    }
+
+    public function testRememberedPagesOfOtherHostsAreIgnored(): void
+    {
+        $browser = $this->browser(self::config());
+        $browser->request('GET', '/login/keycloak');
+        $authorizationUrl = (string) $browser->getResponse()->headers->get('Location');
+        $session = $browser->getRequest()->getSession();
+        $session->set('_security.main.target_path', 'http://localhost.evil.example/');
+        $session->save();
+
+        $browser->request('GET', '/login/keycloak/callback?' . http_build_query(self::keycloakLogin($authorizationUrl)));
+
+        self::assertSame('/', $browser->getResponse()->headers->get('Location'));
     }
 
     public function testExternalReturnPathsAreIgnored(): void
