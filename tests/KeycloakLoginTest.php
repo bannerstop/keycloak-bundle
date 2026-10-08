@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Bannerstop\KeycloakBundle\Tests;
 
+use Bannerstop\Keycloak\Admin\UserDirectory;
+use Bannerstop\Keycloak\Exception\HttpException;
+
 /**
  * Runs against the Keycloak of the core package's tests-e2e (KEYCLOAK_URL).
  *
@@ -103,6 +106,42 @@ final class KeycloakLoginTest extends KeycloakTestCase
         $browser->request('GET', '/api/me', [], [], ['HTTP_AUTHORIZATION' => 'Bearer a.b.c']);
         self::assertSame(401, $browser->getResponse()->getStatusCode());
         self::assertSame('Bearer error="invalid_token"', $browser->getResponse()->headers->get('WWW-Authenticate'));
+    }
+
+    public function testDirectoryUsesTheLoginClientByDefault(): void
+    {
+        $this->browser(self::config());
+
+        self::assertContains('jdoe', self::usernames($this->kernel->getContainer()->get(UserDirectory::class)));
+    }
+
+    public function testDirectoryCanUseItsOwnClient(): void
+    {
+        $this->browser(self::config(['directory' => ['client_id' => 'app-directory', 'client_secret' => 'app-directory-secret']]));
+
+        self::assertContains('jdoe', self::usernames($this->kernel->getContainer()->get(UserDirectory::class)));
+    }
+
+    public function testDirectoryReallyUsesItsOwnClient(): void
+    {
+        $this->browser(self::config(['directory' => ['client_id' => 'app-directory', 'client_secret' => 'wrong-secret']]));
+
+        $this->expectException(HttpException::class);
+
+        self::usernames($this->kernel->getContainer()->get(UserDirectory::class));
+    }
+
+    /**
+     * @return string[]
+     */
+    private static function usernames(UserDirectory $directory): array
+    {
+        $usernames = [];
+        foreach ($directory->users() as $user) {
+            $usernames[] = $user->getUsername();
+        }
+
+        return $usernames;
     }
 
     /**
